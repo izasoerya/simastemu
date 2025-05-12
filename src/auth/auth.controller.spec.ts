@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 describe('AuthController', () => {
-  let appController: AuthController;
+  let authController: AuthController;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -11,6 +11,16 @@ describe('AuthController', () => {
       providers: [AuthService],
     }).compile();
 
-    appController = app.get<AuthController>(AuthController);
+    authController = app.get<AuthController>(AuthController);
+  });
+
+  describe('auth/sign-in', () => {
+    it('should return true when email and password are correct', () => {
+      const result = authController.signIn({
+        email: 'haha@gmail.com',
+        password: '123456',
+      });
+      expect(result).toBe(true);
+    });
   });
 });
