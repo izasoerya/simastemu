@@ -47,6 +47,6 @@ export class UserService {
     if (compareHash) {
       return isUserExist;
     }
-    throw new HttpException('Failed to compare hash', HttpStatus.FORBIDDEN);
+    throw new HttpException('Wrong password', HttpStatus.FORBIDDEN);
   }
 }
