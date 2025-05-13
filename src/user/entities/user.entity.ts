@@ -1,7 +1,9 @@
+import { Inventories } from '../../inventory/entities/inventory.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Timestamp,
 } from 'typeorm';
@@ -25,4 +27,7 @@ export class Users {
 
   @CreateDateColumn()
   createdAt: Timestamp;
+
+  @OneToMany(() => Inventories, (inventory) => inventory.user)
+  inventories: Inventories[];
 }
