@@ -7,5 +7,5 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  password_hashed: string;
+  password: string;
 }
