@@ -45,7 +45,7 @@ describe('e2e', () => {
 
     it('/auth/sign-in (GET)', async () => {
       const response = await request(app.getHttpServer())
-        .get('auth/sign-in')
+        .get('/auth/sign-in')
         .send({
           email: payload.email,
           password: payload.password,
