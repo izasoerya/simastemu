@@ -188,7 +188,7 @@
       "_iqgoTtfxj1-GkJc4YUNK": {
         "id": "_iqgoTtfxj1-GkJc4YUNK",
         "tableId": "6IE_s4rcSphQVRZcqjWH1",
-        "name": "createdAt",
+        "name": "created_at",
         "comment": "",
         "dataType": "timestamptz",
         "default": "",
@@ -201,7 +201,7 @@
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1747027221065,
+          "updateAt": 1747062223475,
           "createAt": 1747027027699
         }
       },
