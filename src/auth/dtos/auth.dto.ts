@@ -1,4 +1,5 @@
-import { IsEmail } from 'class-validator';
+import { IsEmail, IsDate } from 'class-validator';
+import { Timestamp } from 'typeorm';
 
 export class UserSignInDto {
   @IsEmail()
@@ -17,8 +18,13 @@ export class UserSignUpDto {
 }
 
 export class ResponseAuthDto {
+  uid: string;
+
   name: string;
 
   @IsEmail()
   email: string;
+
+  @IsDate()
+  createdAt: Timestamp;
 }

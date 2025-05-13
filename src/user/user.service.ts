@@ -20,4 +20,17 @@ export class UserService {
 
     return this.repo.save(user);
   }
+
+  async findOne(email: string, password: string) {
+    const isUserExist = await this.repo.findOneBy({
+      email: email,
+      password_hashed: password,
+    });
+
+    if (isUserExist === null) {
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+    }
+
+    return isUserExist;
+  }
 }

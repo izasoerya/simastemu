@@ -6,10 +6,10 @@ import { UserSignInDto, UserSignUpDto } from './dtos/auth.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // @Get('sign-in')
-  // signIn(@Body() UserSignInDto: UserSignInDto) {
-  //   return this.authService.userSignIn(UserSignInDto);
-  // }
+  @Get('sign-in')
+  signIn(@Body() UserSignInDto: UserSignInDto) {
+    return this.authService.userSignIn(UserSignInDto);
+  }
 
   @Post('sign-up')
   signUp(@Body() UserSignUpDto: UserSignUpDto) {

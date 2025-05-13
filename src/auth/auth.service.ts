@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ResponseAuthDto, UserSignUpDto } from './dtos/auth.dto';
+import { ResponseAuthDto, UserSignInDto, UserSignUpDto } from './dtos/auth.dto';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dtos/user.dto';
 
@@ -7,13 +7,14 @@ import { CreateUserDto } from '../user/dtos/user.dto';
 export class AuthService {
   constructor(private userService: UserService) {}
 
-  // userSignIn(): boolean {
-  //   console.log('userSignIn', user.email, user.password);
-  //   if (user.email === 'haha@gmail.com' && user.password === '123456') {
-  //     return true;
-  //   }
-  //   return false;
-  // }
+  async userSignIn(user: UserSignInDto): Promise<ResponseAuthDto> {
+    const hashedPassword = 'later will be fixed >.<';
+    const loggedUser = await this.userService.findOne(
+      user.email,
+      hashedPassword,
+    );
+    return loggedUser;
+  }
 
   async userSignUp(user: UserSignUpDto): Promise<ResponseAuthDto> {
     const hashedPassword = 'later will be fixed >.<';
@@ -21,10 +22,13 @@ export class AuthService {
       ...user,
       password_hashed: hashedPassword,
     };
+
     const newUser = await this.userService.createUser(createUserDto);
     const res: ResponseAuthDto = {
+      uid: newUser.uid,
       name: newUser.name,
       email: newUser.email,
+      createdAt: newUser.createdAt,
     };
     return res;
   }
