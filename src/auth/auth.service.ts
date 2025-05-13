@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {
-  ReponseJWT,
-  ResponseSignUp,
-  UserSignInDto,
-  UserSignUpDto,
-} from './dtos/auth.dto';
+import { ResponseSignUp, UserSignInDto, UserSignUpDto } from './dtos/auth.dto';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dtos/user.dto';
-import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
