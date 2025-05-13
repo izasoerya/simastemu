@@ -1,5 +1,4 @@
-import { IsEmail, IsDate } from 'class-validator';
-import { Timestamp } from 'typeorm';
+import { IsEmail } from 'class-validator';
 
 export class UserSignInDto {
   @IsEmail()

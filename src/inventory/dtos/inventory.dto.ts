@@ -25,10 +25,10 @@ export class ResponseInventoryDto {
   longitude: number;
 
   @IsDate()
-  createdAt: Timestamp;
+  createdAt: Date;
 
   @IsDate()
-  updatedAt: Timestamp;
+  updatedAt: Date;
 
   imageURLs: string[];
 }

@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Timestamp,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -28,9 +29,9 @@ export class Inventories {
   @ManyToOne(() => Users, (user) => user.inventories, { nullable: false })
   user: Users;
 
-  @CreateDateColumn()
-  createdAt: Timestamp;
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
 
-  @Column('timestamptz', { nullable: true })
-  updatedAt: Timestamp;
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 }

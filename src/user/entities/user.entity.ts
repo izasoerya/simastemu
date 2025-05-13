@@ -25,8 +25,8 @@ export class Users {
   @Column('text')
   password_salt: string;
 
-  @CreateDateColumn()
-  createdAt: Timestamp;
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
 
   @OneToMany(() => Inventories, (inventory) => inventory.user)
   inventories: Inventories[];
