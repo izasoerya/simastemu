@@ -34,6 +34,9 @@ describe('e2e', () => {
       email: 'test@gmail.com',
       password: 'hashed',
     };
+
+    let accessToken: string; // 👈 store token for reuse
+
     it('/auth/sign-up (POST)', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/sign-up')
@@ -53,6 +56,24 @@ describe('e2e', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('accessToken');
+      accessToken = response.body.accessToken; // 👈 save token
+    });
+
+    const payloadInventory = {
+      name: 'Al-Maun',
+      latitude: -7.825525,
+      longitude: 110.336756,
+      imageURLs: [],
+    };
+
+    it('/inventory/create (POST)', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/inventory/create')
+        .set('Authorization', `Bearer ${accessToken}`) // 👈 use token here
+        .send(payloadInventory)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('name');
     });
   });
 });
