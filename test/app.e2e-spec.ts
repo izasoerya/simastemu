@@ -52,7 +52,7 @@ describe('e2e', () => {
         })
         .expect(200);
 
-      expect(response.body).toHaveProperty('uid');
+      expect(response.body).toHaveProperty('accessToken');
     });
   });
 });
