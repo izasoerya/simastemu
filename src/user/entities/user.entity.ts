@@ -20,6 +20,9 @@ export class Users {
   @Column('text')
   password_hashed: string;
 
+  @Column('text')
+  password_salt: string;
+
   @CreateDateColumn()
   createdAt: Timestamp;
 }
