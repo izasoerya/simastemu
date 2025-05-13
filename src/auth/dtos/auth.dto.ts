@@ -17,14 +17,13 @@ export class UserSignUpDto {
   password: string;
 }
 
-export class ResponseAuthDto {
-  uid: string;
+export class ReponseJWT {
+  accessToken: string;
+}
 
+export class ResponseSignUp {
   name: string;
 
   @IsEmail()
   email: string;
-
-  @IsDate()
-  createdAt: Timestamp;
 }

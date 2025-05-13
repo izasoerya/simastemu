@@ -1,38 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { ResponseAuthDto, UserSignInDto, UserSignUpDto } from './dtos/auth.dto';
+import {
+  ReponseJWT,
+  ResponseSignUp,
+  UserSignInDto,
+  UserSignUpDto,
+} from './dtos/auth.dto';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dtos/user.dto';
 import bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-  async userSignIn(user: UserSignInDto): Promise<ResponseAuthDto> {
+  async userSignIn(user: UserSignInDto): Promise<{ accessToken: string }> {
     const loggedUser = await this.userService.findOne(
       user.email,
       user.password,
     );
-    const res: ResponseAuthDto = {
-      uid: loggedUser.uid,
-      name: loggedUser.name,
-      email: loggedUser.email,
-      createdAt: loggedUser.createdAt,
+    const payload = { sub: loggedUser.uid, name: loggedUser.name };
+    return {
+      accessToken: await this.jwtService.signAsync(payload),
     };
-    return res;
   }
 
-  async userSignUp(user: UserSignUpDto): Promise<ResponseAuthDto> {
+  async userSignUp(user: UserSignUpDto): Promise<ResponseSignUp> {
     const createUserDto: CreateUserDto = {
       ...user,
     };
 
     const newUser = await this.userService.createUser(createUserDto);
-    const res: ResponseAuthDto = {
-      uid: newUser.uid,
+    const res: ResponseSignUp = {
       name: newUser.name,
       email: newUser.email,
-      createdAt: newUser.createdAt,
     };
     return res;
   }
