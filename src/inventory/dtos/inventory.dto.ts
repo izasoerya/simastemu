@@ -15,7 +15,23 @@ export class CreateInventoryDto {
   userUID: string;
 }
 
+export class PatchInventoryDto {
+  id?: string;
+
+  name?: string;
+
+  @IsNumeric()
+  latitude?: number;
+
+  @IsNumeric()
+  longitude?: number;
+
+  imageURLs?: string[];
+}
+
 export class ResponseInventoryDto {
+  id: string;
+
   name: string;
 
   @IsNumeric()

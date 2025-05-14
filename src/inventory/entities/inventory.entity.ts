@@ -12,7 +12,7 @@ import {
 @Entity()
 export class Inventories {
   @PrimaryGeneratedColumn('uuid')
-  uid: string;
+  id: string;
 
   @Column()
   name: string;

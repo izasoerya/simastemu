@@ -1,6 +1,18 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
-import { CreateInventoryDto, ResponseInventoryDto } from './dtos/inventory.dto';
+import {
+  CreateInventoryDto,
+  PatchInventoryDto,
+  ResponseInventoryDto,
+} from './dtos/inventory.dto';
 import { InventoryService } from './inventory.service';
 import { Request } from 'supertest';
 
@@ -20,16 +32,31 @@ export class InventoryController {
     };
 
     const res = await this.inventoryService.create(createInventoryDto);
-
-    const responseInventoryDto: ResponseInventoryDto = {
-      name: res.name,
-      latitude: res.latitude,
-      longitude: res.longitude,
-      createdAt: res.createdAt,
-      updatedAt: res.updatedAt,
-      imageURLs: res.imageURLs,
-    };
+    const { user, ...responseInventoryDto } = res;
 
     return responseInventoryDto;
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('read')
+  async getInventory(@Req() req): Promise<ResponseInventoryDto[]> {
+    const inventories = await this.inventoryService.read(req.user.sub);
+    return inventories.map(({ user, ...rest }) => rest);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('readAll')
+  async getAllInventory(): Promise<ResponseInventoryDto[]> {
+    const res = await this.inventoryService.read(undefined);
+    return res;
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('patch')
+  async patchInventory(
+    @Body() body: PatchInventoryDto,
+  ): Promise<ResponseInventoryDto> {
+    const res = await this.inventoryService.patch(body.id!, body);
+    return res;
   }
 }
