@@ -4,10 +4,15 @@ import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { DataSource } from 'typeorm';
+import {
+  CreateInventoryDto,
+  ResponseInventoryDto,
+} from 'src/inventory/dtos/inventory.dto';
 
 describe('e2e', () => {
   let app: INestApplication<App>;
   let database: DataSource;
+  let accessToken: string;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -35,8 +40,6 @@ describe('e2e', () => {
       password: 'hashed',
     };
 
-    let accessToken: string; // 👈 store token for reuse
-
     it('/auth/sign-up (POST)', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/sign-up')
@@ -56,7 +59,7 @@ describe('e2e', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('accessToken');
-      accessToken = response.body.accessToken; // 👈 save token
+      accessToken = response.body.accessToken;
     });
 
     const payloadInventory = {
@@ -69,9 +72,33 @@ describe('e2e', () => {
     it('/inventory/create (POST)', async () => {
       const response = await request(app.getHttpServer())
         .post('/inventory/create')
-        .set('Authorization', `Bearer ${accessToken}`) // 👈 use token here
+        .set('Authorization', `Bearer ${accessToken}`)
         .send(payloadInventory)
         .expect(201);
+
+      expect(response.body).toHaveProperty('name');
+    });
+
+    let inventoryResponse;
+    it('/inventory/read (GET)', async () => {
+      inventoryResponse = await request(app.getHttpServer())
+        .get('/inventory/read')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
+
+      expect(Array.isArray(inventoryResponse.body)).toBe(true);
+      expect(inventoryResponse.body.length).toBeGreaterThan(0);
+    });
+
+    it('/inventory/patch (PATCH)', async () => {
+      const patchTest = {
+        id: inventoryResponse.id,
+      };
+      const response = await request(app.getHttpServer())
+        .patch('/inventory/patch')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(patchTest)
+        .expect(200);
 
       expect(response.body).toHaveProperty('name');
     });
