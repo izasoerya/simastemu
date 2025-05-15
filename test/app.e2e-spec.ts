@@ -4,10 +4,8 @@ import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { DataSource } from 'typeorm';
-import {
-  CreateInventoryDto,
-  ResponseInventoryDto,
-} from 'src/inventory/dtos/inventory.dto';
+import * as fs from 'fs';
+import * as path from 'path';
 
 describe('e2e', () => {
   let app: INestApplication<App>;
@@ -31,6 +29,19 @@ describe('e2e', () => {
       await database.destroy();
     }
     await app.close();
+    // Delete file
+    const filePath = path.resolve(__dirname, 'fixtures', 'large-file.png');
+    fs.unlink(filePath, (err) => {
+      if (err && err.code !== 'ENOENT')
+        console.error('Failed to delete file:', err);
+    });
+
+    // Delete folder and contents recursively
+    const uploadTestFolder = path.resolve(__dirname, '../uploads/test_db');
+    fs.rm(uploadTestFolder, { recursive: true, force: true }, (err) => {
+      if (err && err.code !== 'ENOENT')
+        console.error('Failed to delete folder:', err);
+    });
   });
 
   describe('e2e authentication', () => {
@@ -101,6 +112,22 @@ describe('e2e', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('name');
+    });
+
+    it('/file/upload (POST)', async () => {
+      const filePath = './test/fixtures/large-file.png';
+      const sizeInBytes = 1024 * 1024 + 1; // >1MB
+
+      fs.writeFileSync(filePath, Buffer.alloc(sizeInBytes, 0));
+
+      const response = await request(app.getHttpServer())
+        .post('/file/upload')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Content-Type', 'multipart/form-data')
+        .attach('file', filePath)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('path');
     });
   });
 });
