@@ -30,7 +30,7 @@ describe('e2e', () => {
     }
     await app.close();
     // Delete file
-    const filePath = path.resolve(__dirname, 'fixtures', 'large-file.png');
+    const filePath = path.resolve(__dirname, 'large-file.png');
     fs.unlink(filePath, (err) => {
       if (err && err.code !== 'ENOENT')
         console.error('Failed to delete file:', err);
@@ -73,11 +73,50 @@ describe('e2e', () => {
       accessToken = response.body.accessToken;
     });
 
+    let singlePath;
+    it('/file/upload (POST)', async () => {
+      const filePath = './test/large-file.png';
+      const sizeInBytes = 1024 * 1024 + 1; // >1MB
+
+      fs.writeFileSync(filePath, Buffer.alloc(sizeInBytes, 0));
+
+      const response = await request(app.getHttpServer())
+        .post(`/file/upload/sppt`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Content-Type', 'multipart/form-data')
+        .attach('file', filePath)
+        .expect(201);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(1);
+      singlePath = response.body[0].path;
+    });
+
+    let multiplePath;
+    it('/file/uploads/ (POST)', async () => {
+      const filePath = './test/large-file.png';
+      const sizeInBytes = 1024 * 1024 + 1; // >1MB
+
+      fs.writeFileSync(filePath, Buffer.alloc(sizeInBytes, 0));
+
+      const response = await request(app.getHttpServer())
+        .post(`/file/uploads/sppt`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Content-Type', 'multipart/form-data')
+        .attach('files', filePath)
+        .attach('files', filePath)
+        .expect(201);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThan(0);
+      multiplePath = response.body.map((e) => e.path);
+    });
+
     const payloadInventory = {
       name: 'Al-Maun',
       latitude: -7.825525,
       longitude: 110.336756,
-      imageURLs: [],
+      imageURLs: [singlePath],
     };
 
     it('/inventory/create (POST)', async () => {
@@ -98,12 +137,13 @@ describe('e2e', () => {
         .expect(200);
 
       expect(Array.isArray(inventoryResponse.body)).toBe(true);
-      expect(inventoryResponse.body.length).toBeGreaterThan(0);
+      expect(inventoryResponse.body[0].imageURLs).toBe(singlePath);
     });
 
     it('/inventory/patch (PATCH)', async () => {
       const patchTest = {
         id: inventoryResponse.id,
+        name: 'HeadQuarters',
       };
       const response = await request(app.getHttpServer())
         .patch('/inventory/patch')
@@ -111,23 +151,7 @@ describe('e2e', () => {
         .send(patchTest)
         .expect(200);
 
-      expect(response.body).toHaveProperty('name');
-    });
-
-    it('/file/upload (POST)', async () => {
-      const filePath = './test/fixtures/large-file.png';
-      const sizeInBytes = 1024 * 1024 + 1; // >1MB
-
-      fs.writeFileSync(filePath, Buffer.alloc(sizeInBytes, 0));
-
-      const response = await request(app.getHttpServer())
-        .post('/file/upload')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .set('Content-Type', 'multipart/form-data')
-        .attach('file', filePath)
-        .expect(201);
-
-      expect(response.body).toHaveProperty('path');
+      expect(response.body.name).toBe('HeadQuarters');
     });
   });
 });
