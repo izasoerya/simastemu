@@ -30,7 +30,7 @@ export class FileController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('upload/:type/:id')
+  @Post('upload/:type')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -42,7 +42,6 @@ export class FileController {
           cb(null, dest);
         },
         filename: (req, file, cb) => {
-          const id = req.params.id;
           const type = req.params.type;
           const uniqueSuffix = generateFileName(file);
           const ext = extname(file.originalname);
@@ -68,7 +67,7 @@ export class FileController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('uploads/:type/:id')
+  @Post('uploads/:type')
   @UseInterceptors(
     FilesInterceptor('files', 10, {
       storage: diskStorage({
@@ -80,7 +79,6 @@ export class FileController {
           cb(null, dest);
         },
         filename: (req, file, cb) => {
-          const id = req.params.id;
           const type = req.params.type;
           const uniqueSuffix = generateFileName(file);
           const ext = extname(file.originalname);
