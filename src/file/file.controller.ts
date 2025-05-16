@@ -9,9 +9,12 @@ import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { AuthGuard } from '../auth/auth.guard';
+import { FileService } from './file.service';
 
 @Controller('file')
 export class FileController {
+  constructor(private fileService: FileService) {}
+
   @UseGuards(AuthGuard)
   @Post('upload')
   @UseInterceptors(
@@ -27,18 +30,7 @@ export class FileController {
       }),
     }),
   )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      console.error('File upload failed: file is undefined');
-      throw new Error('No file uploaded');
-    }
-
-    return {
-      filename: file.filename,
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      path: file.path,
-    };
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return this.fileService.processResponse(file);
   }
 }
