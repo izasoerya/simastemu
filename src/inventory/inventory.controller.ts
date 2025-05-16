@@ -35,7 +35,6 @@ export class InventoryController {
 
     const res = await this.inventoryService.create(createInventoryDto);
     const { user, ...responseInventoryDto } = res;
-    console.log(responseInventoryDto);
 
     return responseInventoryDto;
   }

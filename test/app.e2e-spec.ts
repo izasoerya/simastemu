@@ -112,14 +112,13 @@ describe('e2e', () => {
       multiplePath = response.body.map((e) => e.path);
     });
 
-    const payloadInventory = {
-      name: 'Al-Maun',
-      latitude: -7.825525,
-      longitude: 110.336756,
-      imageURLs: [singlePath],
-    };
-
     it('/inventory/create (POST)', async () => {
+      const payloadInventory = {
+        name: 'Al-Maun',
+        latitude: -7.825525,
+        longitude: 110.336756,
+        imageURLs: [singlePath],
+      };
       const response = await request(app.getHttpServer())
         .post('/inventory/create')
         .set('Authorization', `Bearer ${accessToken}`)
@@ -137,7 +136,7 @@ describe('e2e', () => {
         .expect(200);
 
       expect(Array.isArray(inventoryResponse.body)).toBe(true);
-      expect(inventoryResponse.body[0].imageURLs).toBe(singlePath);
+      expect(inventoryResponse.body[0].imageURLs[0]).toBe(singlePath);
     });
 
     it('/inventory/patch (PATCH)', async () => {
@@ -154,11 +153,12 @@ describe('e2e', () => {
       expect(response.body.name).toBe('HeadQuarters');
     });
 
-    // it('/inventory/delete (DELETE)', async () => {
-    //   const response = await request(app.getHttpServer())
-    //     .delete(`/inventory/delete/${inventoryResponse.id}`)
-    //     .set('Authorization', `Bearer ${accessToken}`)
-    //     .expect(200);
-    // });
+    it('/inventory/delete (DELETE)', async () => {
+      console.log(inventoryResponse.body[0]);
+      const response = await request(app.getHttpServer())
+        .delete(`/inventory/delete/${inventoryResponse.body[0].id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
+    });
   });
 });
