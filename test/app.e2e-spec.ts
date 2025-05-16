@@ -153,5 +153,12 @@ describe('e2e', () => {
 
       expect(response.body.name).toBe('HeadQuarters');
     });
+
+    // it('/inventory/delete (DELETE)', async () => {
+    //   const response = await request(app.getHttpServer())
+    //     .delete(`/inventory/delete/${inventoryResponse.id}`)
+    //     .set('Authorization', `Bearer ${accessToken}`)
+    //     .expect(200);
+    // });
   });
 });

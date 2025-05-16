@@ -35,4 +35,9 @@ export class InventoryService {
     const updatedInventory = this.repo.merge(existingInventory, inventory);
     return this.repo.save(updatedInventory);
   }
+
+  async remove(id: string) {
+    const deletedInventory = this.repo.delete({ id: id });
+    return deletedInventory;
+  }
 }

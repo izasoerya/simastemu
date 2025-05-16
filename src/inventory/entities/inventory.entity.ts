@@ -23,7 +23,7 @@ export class Inventories {
   @Column('numeric', { precision: 9, scale: 6 })
   longitude: number;
 
-  @Column('text', { array: true })
+  @Column('text', { array: true, nullable: false })
   imageURLs: string[];
 
   @ManyToOne(() => Users, (user) => user.inventories, { nullable: false })

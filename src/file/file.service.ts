@@ -33,7 +33,6 @@ export class FileService {
     if (!file) {
       throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
     }
-    console.log(file.length);
     if (file.length === 1) {
       const res: ResponseFileDto = {
         path: file[0].filename,

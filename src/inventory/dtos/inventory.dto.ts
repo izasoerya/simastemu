@@ -1,5 +1,4 @@
 import { IsDate, IsNumeric, IsUrl } from 'class-validator';
-import { Timestamp } from 'typeorm';
 
 export class CreateInventoryDto {
   name: string;
@@ -47,9 +46,4 @@ export class ResponseInventoryDto {
   updatedAt: Date;
 
   imageURLs: string[];
-}
-
-export class ResponseFileDto {
-  @IsUrl()
-  url: string;
 }

@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Patch,
   Post,
   Req,
@@ -33,6 +35,7 @@ export class InventoryController {
 
     const res = await this.inventoryService.create(createInventoryDto);
     const { user, ...responseInventoryDto } = res;
+    console.log(responseInventoryDto);
 
     return responseInventoryDto;
   }
@@ -58,5 +61,11 @@ export class InventoryController {
   ): Promise<ResponseInventoryDto> {
     const res = await this.inventoryService.patch(body.id!, body);
     return res;
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('delete/:id')
+  deleteInventory(@Param('id') id: string) {
+    return this.inventoryService.remove(id);
   }
 }
