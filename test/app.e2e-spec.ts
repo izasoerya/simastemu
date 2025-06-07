@@ -11,6 +11,8 @@ describe('e2e', () => {
   let app: INestApplication<App>;
   let database: DataSource;
   let accessToken: string;
+  let singlePath: string;
+  let multiplePath: [string];
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -57,7 +59,8 @@ describe('e2e', () => {
         .send(payload)
         .expect(201);
 
-      expect(response.body).toHaveProperty('email');
+      expect(response.body.name).toEqual('test');
+      expect(response.body.email).toEqual('test@gmail.com');
     });
 
     it('/auth/sign-in (GET)', async () => {
@@ -73,7 +76,6 @@ describe('e2e', () => {
       accessToken = response.body.accessToken;
     });
 
-    let singlePath;
     it('/file/upload (POST)', async () => {
       const filePath = './test/large-file.png';
       const sizeInBytes = 1024 * 1024 + 1; // >1MB
@@ -92,7 +94,6 @@ describe('e2e', () => {
       singlePath = response.body[0].path;
     });
 
-    let multiplePath;
     it('/file/uploads/ (POST)', async () => {
       const filePath = './test/large-file.png';
       const sizeInBytes = 1024 * 1024 + 1; // >1MB
@@ -108,7 +109,7 @@ describe('e2e', () => {
         .expect(201);
 
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body.length).toEqual(2);
       multiplePath = response.body.map((e) => e.path);
     });
 
@@ -125,7 +126,10 @@ describe('e2e', () => {
         .send(payloadInventory)
         .expect(201);
 
-      expect(response.body).toHaveProperty('name');
+      expect(response.body.name).toEqual(payloadInventory.name);
+      expect(response.body.latitude).toEqual(payloadInventory.latitude);
+      expect(response.body.longitude).toEqual(payloadInventory.longitude);
+      expect(response.body.imageURLs.length).toEqual(1);
     });
 
     let inventoryResponse;
@@ -159,6 +163,14 @@ describe('e2e', () => {
         .delete(`/inventory/delete/${inventoryResponse.body[0].id}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
+      console.log(response);
     });
+
+    // it('/file/delete (DELETE)', async () => {
+    //   const response = await request(app.getHttpServer())
+    //     .delete(`/file/delete/${singlePath}`)
+    //     .set('Authorization', `Bearer ${accessToken}`)
+    //     .expect(200);
+    // });
   });
 });
