@@ -16,7 +16,6 @@ import {
   ResponseInventoryDto,
 } from './dtos/inventory.dto';
 import { InventoryService } from './inventory.service';
-import { Request } from 'supertest';
 
 @Controller('inventory')
 export class InventoryController {
