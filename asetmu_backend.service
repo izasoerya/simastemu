@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User=izasoerya
-WorkingDirectory=/home/izasoerya/simastmu
+WorkingDirectory=/home/izasoerya/simasetmu
 ExecStart=/usr/bin/npm run start:prod:linux
 Restart=on-failure
 
