@@ -1,0 +1,13 @@
+[Unit]
+Description=Asetmu Backend NestJS
+After=network.target
+
+[Service]
+Type=simple
+User=izasoerya
+WorkingDirectory=/home/izasoerya/simastmu
+ExecStart=/usr/bin/npm run start:prod:linux
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
