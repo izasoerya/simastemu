@@ -6,7 +6,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}.local`,
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
@@ -16,7 +16,7 @@ import { ConfigModule } from '@nestjs/config';
         username: process.env.DB_USERNAME,
         password: `${process.env.DB_PASSWORD}`,
         database: process.env.DB_NAME,
-        synchronize: true,
+        synchronize: process.env.DB_SYNC! === 'true',
         autoLoadEntities: true,
       }),
     }),
