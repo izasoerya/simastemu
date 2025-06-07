@@ -16,7 +16,7 @@ import { ConfigModule } from '@nestjs/config';
         username: process.env.DB_USERNAME,
         password: `${process.env.DB_PASSWORD}`,
         database: process.env.DB_NAME,
-        synchronize: process.env.DB_SYNC! == 'true' ? true : false,
+        synchronize: process.env.DB_SYNC! === 'true',
         autoLoadEntities: true,
       }),
     }),

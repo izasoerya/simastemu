@@ -12,7 +12,7 @@ describe('e2e', () => {
   let database: DataSource;
   let accessToken: string;
   let singlePath: string;
-  let multiplePath: [string];
+  let multiplePath: string[];
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
