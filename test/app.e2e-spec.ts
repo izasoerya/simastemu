@@ -26,11 +26,13 @@ describe('e2e', () => {
   });
 
   afterAll(async () => {
+    // Delete Database
     if (database) {
       await database.dropDatabase();
       await database.destroy();
     }
     await app.close();
+
     // Delete file
     const filePath = path.resolve(__dirname, 'large-file.png');
     fs.unlink(filePath, (err) => {
@@ -46,7 +48,7 @@ describe('e2e', () => {
     });
   });
 
-  describe('e2e authentication', () => {
+  describe('e2e all', () => {
     const payload = {
       name: 'test',
       email: 'test@gmail.com',
