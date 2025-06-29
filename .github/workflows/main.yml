@@ -44,6 +44,9 @@ jobs:
       - name: 📝 Create .env.test file
         run: echo "${{ secrets.ENV_TEST }}" > .env.test
 
+      - name: 🔍 Debug ENV
+        run: cat .env.test && env | grep DB
+
       - name: 🔎 Run unit tests
         run: npm run test
 
