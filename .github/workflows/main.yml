@@ -44,8 +44,18 @@ jobs:
       - name: 📝 Create .env.test file
         run: echo "${{ secrets.ENV_TEST }}" > .env.test
 
-      - name: 🔍 Debug ENV
-        run: cat .env.test && env | grep DB
+      - name: 📝 Check .env.test file contents
+        run: |
+          if [ -f .env.test ]; then
+            echo "✅ .env.test exists"
+            cat .env.test
+          else
+            echo "❌ .env.test not found"
+            exit 1
+          fi
+
+      - name: 🧪 Print DB-related env variables
+        run: printenv | grep DB || true
 
       - name: 🔎 Run unit tests
         run: npm run test
