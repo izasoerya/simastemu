@@ -10,23 +10,8 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:13
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
-      NODE_ENV: test
+      NODE_ENV: production
 
     steps:
       - name: ⬇️ Checkout code
@@ -38,24 +23,46 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      - name: 📝 Write .env.production from secret
+        run: echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+
+      - name: 📦 Parse .env.production into environment variables
+        run: |
+          set -a
+          source .env.production
+          echo "DB_USERNAME=$DB_USERNAME" >> $GITHUB_ENV
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+          set +a
+
+      - name: 🚀 Start PostgreSQL service manually
+        run: |
+          docker run -d \
+            --name postgres \
+            -e POSTGRES_USER=$DB_USERNAME \
+            -e POSTGRES_PASSWORD=$DB_PASSWORD \
+            -e POSTGRES_DB=$DB_NAME \
+            -p $DB_PORT:5432 \
+            --health-cmd="pg_isready" \
+            --health-interval=10s \
+            --health-timeout=5s \
+            --health-retries=5 \
+            postgres:13
+
+      - name: 🕒 Wait for PostgreSQL to be healthy
+        run: |
+          for i in {1..10}; do
+            if docker exec postgres pg_isready; then
+              echo "✅ Postgres is ready"
+              break
+            fi
+            echo "⏳ Waiting for Postgres..."
+            sleep 3
+          done
+
       - name: 📦 Install dependencies
         run: npm ci
-
-      - name: 📝 Create .env.test file
-        run: echo "${{ secrets.ENV_TEST }}" > .env.test
-
-      - name: 📝 Check .env.test file contents
-        run: |
-          if [ -f .env.test ]; then
-            echo "✅ .env.test exists"
-            cat .env.test
-          else
-            echo "❌ .env.test not found"
-            exit 1
-          fi
-
-      - name: 🧪 Print DB-related env variables
-        run: printenv | grep DB || true
 
       - name: 🔎 Run unit tests
         run: npm run test
@@ -67,4 +74,4 @@ jobs:
         run: npm run build
 
       - name: 📜 Run migrations
-        run: npm run typeorm -- migration:run
+        run: npm run typeorm -- -d ./data-source.ts migration:run
