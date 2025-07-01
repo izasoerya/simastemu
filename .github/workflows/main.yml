@@ -68,7 +68,7 @@ jobs:
         run: npm run build
 
       - name: 📜 Run migrations
-        run: npm run typeorm -- migration:run:prod
+        run: npm run typeorm -- migration:run
 
       - name: 🔎 Run unit tests
         run: npm run test
