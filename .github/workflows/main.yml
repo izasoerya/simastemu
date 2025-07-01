@@ -65,7 +65,7 @@ jobs:
         run: npm ci
 
       - name: 📜 Log installed packages
-        run: npm list --depth=0
+        run: npm list
 
       - name: 🔎 Run unit tests
         run: npm run test
