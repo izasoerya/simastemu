@@ -65,14 +65,14 @@ describe('e2e', () => {
       expect(response.body.email).toEqual('test@gmail.com');
     });
 
-    it('/auth/sign-in (GET)', async () => {
+    it('/auth/sign-in (POST)', async () => {
       const response = await request(app.getHttpServer())
-        .get('/auth/sign-in')
+        .post('/auth/sign-in')
         .send({
           email: payload.email,
           password: payload.password,
         })
-        .expect(200);
+        .expect(201);
 
       expect(response.body).toHaveProperty('accessToken');
       accessToken = response.body.accessToken;

@@ -11,7 +11,7 @@ import {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Get('sign-in')
+  @Post('sign-in')
   signIn(@Body() UserSignInDto: UserSignInDto): Promise<ReponseJWT> {
     return this.authService.userSignIn(UserSignInDto);
   }
