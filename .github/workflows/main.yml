@@ -64,6 +64,9 @@ jobs:
       - name: 📜 Log installed packages
         run: npm list
 
+      - name: 🛠️ Generate migration
+        run: npm run typeorm migration:generate -- src/migrations/InitDB
+
       - name: 🏗️ Build app
         run: npm run build
 
