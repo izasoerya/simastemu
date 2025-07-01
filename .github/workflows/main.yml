@@ -27,11 +27,13 @@ jobs:
         run: |
           set -a
           source .env.production
-          echo "DB_USERNAME=$DB_USERNAME" >> $GITHUB_ENV
-          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
-          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
-          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
           set +a
+          # Export all non-empty, non-comment variables to GITHUB_ENV
+          grep -v '^\s*#' .env.production | grep -E '^\s*[A-Za-z_][A-Za-z0-9_]*=' | while IFS= read -r line; do
+            key=$(echo "$line" | cut -d= -f1 | xargs)
+            value=$(echo "$line" | cut -d= -f2- | xargs)
+            echo "$key=$value" >> $GITHUB_ENV
+          done
 
       - name: 🚀 Start PostgreSQL service manually
         run: |
