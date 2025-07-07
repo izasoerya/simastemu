@@ -1,0 +1,25 @@
+# .dockerignore
+
+# Node.js
+node_modules
+npm-debug.log
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Git
+.git
+
+# Environment files
+.env
+.env.*
+
+# Compiled output (we build this inside the container)
+dist
+build
+
+# Test and OS files
+/coverage
+.DS_Store
