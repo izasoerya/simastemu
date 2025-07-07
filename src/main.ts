@@ -9,7 +9,7 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log'],
   });
   app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT!);
 }
 
 bootstrap();
