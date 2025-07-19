@@ -1,9 +1,5 @@
 # ---- Base Stage ----
-# Use the specific Node.js version from your .github/workflows/main.yml
-# Using an Alpine-based image for a smaller footprint
 FROM node:20-alpine AS base
-
-# Set the working directory
 WORKDIR /usr/src/app
 
 # ---- Dependencies Stage ----
