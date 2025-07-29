@@ -27,6 +27,7 @@ RUN npm run build
 # ---- Production Stage ----
 # This is the final, minimal image for production.
 FROM base AS production
+ENV NODE_ENV=production
 
 # Copy only the production dependencies from the 'deps' stage.
 # This keeps the final image smaller.
@@ -38,12 +39,18 @@ COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/data-source.ts ./
 
-# Create a non-root user and group for better security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
 # Expose the port the application will run on (default is 3000)
 EXPOSE 3000
+
+# Copy the custom entrypoint
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Set the entrypoint
+# Create a non-root user and switch to it
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # The command to start the application in production mode
 # This matches your 'start:prod' script.
