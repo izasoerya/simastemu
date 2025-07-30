@@ -1,25 +1,22 @@
-# .dockerignore
-
-# Node.js
+# Node dependencies
 node_modules
 npm-debug.log
+yarn-error.log
 
-# Docker
-Dockerfile
-.dockerignore
-docker-compose.yml
-
-# Git
-.git
+# Build output
+dist
+*.tsbuildinfo
 
 # Environment files
-.env
-.env.*
+.env*
+!.env.development  # optionally keep one for development only
 
-# Compiled output (we build this inside the container)
-dist
-build
-
-# Test and OS files
-/coverage
+# IDE/editor settings
+.vscode
+.idea
 .DS_Store
+
+# Docker & misc
+Dockerfile
+docker-compose*
+.dockerignore

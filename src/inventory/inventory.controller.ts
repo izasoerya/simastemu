@@ -8,6 +8,7 @@ import {
   Post,
   Req,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import {
@@ -32,9 +33,14 @@ export class InventoryController {
       userUID: req.user.sub,
     };
 
+    Object.entries(createInventoryDto).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        throw new BadRequestException(`Missing or invalid value for: ${key}`);
+      }
+    });
+
     const res = await this.inventoryService.create(createInventoryDto);
     const { user, ...responseInventoryDto } = res;
-
     return responseInventoryDto;
   }
 

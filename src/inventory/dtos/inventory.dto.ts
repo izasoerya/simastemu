@@ -1,16 +1,25 @@
-import { IsDate, IsNumeric, IsUrl } from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber, Min, Max } from 'class-validator';
 
 export class CreateInventoryDto {
+  @IsNotEmpty()
   name: string;
 
-  @IsNumeric()
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
   latitude: number;
 
-  @IsNumeric()
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
   longitude: number;
 
+  @IsNotEmpty()
   imageURLs: string[];
 
+  @IsNotEmpty()
   userUID: string;
 }
 
@@ -19,31 +28,46 @@ export class PatchInventoryDto {
 
   name?: string;
 
-  @IsNumeric()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
   latitude?: number;
 
-  @IsNumeric()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
   longitude?: number;
 
   imageURLs?: string[];
 }
 
 export class ResponseInventoryDto {
+  @IsNotEmpty()
   id: string;
 
+  @IsNotEmpty()
   name: string;
 
-  @IsNumeric()
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
   latitude: number;
 
-  @IsNumeric()
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
   longitude: number;
 
+  @IsNotEmpty()
   @IsDate()
   createdAt: Date;
 
+  @IsNotEmpty()
   @IsDate()
   updatedAt: Date;
 
+  @IsNotEmpty()
   imageURLs: string[];
 }
