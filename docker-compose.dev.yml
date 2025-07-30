@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: simastemu-backend
+    command: npm run start:dev
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env.development
+    environment:
+      DB_HOST: db
+    depends_on:
+      - db
+    develop:
+      watch:
+        - path: ./src
+          action: rebuild
+          target: /usr/src/app/src
+        - path: ./package.json
+          action: rebuild
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+      - ./src:/usr/src/app/src
+
+  db:
+    image: postgres:17-alpine
+    container_name: simastemu-db
+    env_file:
+      - .env.development
+    # ports:
+    #   - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d -U $$POSTGRES_USER']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
