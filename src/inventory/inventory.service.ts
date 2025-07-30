@@ -14,9 +14,6 @@ export class InventoryService {
   ) {}
 
   async create(dto: CreateInventoryDto) {
-    this.logger.log(
-      `Creating inventory for user ${dto.userUID} with name ${dto.name}`,
-    );
     const newInventory = this.repo.create({
       ...dto,
       user: { uid: dto.userUID },
@@ -30,14 +27,12 @@ export class InventoryService {
 
   async read(userId?: string) {
     if (userId) {
-      this.logger.log(`Reading inventories for user ${userId}`);
       const inventories = await this.repo.findBy({ user: { uid: userId } });
       this.logger.log(
         `Found ${inventories.length} inventories for user ${userId}`,
       );
       return inventories;
     } else {
-      this.logger.log(`Reading all inventories`);
       const inventories = await this.repo.find();
       this.logger.log(`Found ${inventories.length} inventories in total`);
       return inventories;
@@ -45,7 +40,6 @@ export class InventoryService {
   }
 
   async patch(id: string, inventory: PatchInventoryDto) {
-    this.logger.log(`Patching inventory with ID ${id}`);
     const existingInventory = await this.repo.findOneBy({ id });
     if (!existingInventory) {
       this.logger.error(`Inventory with ID ${id} not found`);
@@ -58,7 +52,6 @@ export class InventoryService {
   }
 
   async remove(id: string) {
-    this.logger.log(`Removing inventory with ID ${id}`);
     const deletedInventory = await this.repo.delete({ id: id });
     this.logger.log(
       `Removed inventory with ID ${id}. Affected rows: ${deletedInventory.affected}`,
