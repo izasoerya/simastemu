@@ -5,7 +5,6 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  Timestamp,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -17,11 +16,32 @@ export class Inventories {
   @Column()
   name: string;
 
+  @Column()
+  ownerName: string;
+
+  @Column()
+  spptNumber: string;
+
+  @Column()
+  certificateNumber: string;
+
   @Column('numeric', { precision: 9, scale: 6 })
   latitude: number;
 
   @Column('numeric', { precision: 9, scale: 6 })
   longitude: number;
+
+  @Column('numeric')
+  sizeArea: number;
+
+  @Column('numeric')
+  landPrice: number;
+
+  @Column('numeric')
+  njopPrice: number;
+
+  @Column('numeric')
+  zonePrice: number;
 
   @Column('text', { array: true, nullable: false })
   imageURLs: string[];
