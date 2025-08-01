@@ -43,14 +43,14 @@ COPY --from=builder /usr/src/app/data-source.ts ./
 EXPOSE 3000
 
 # Copy the custom entrypoint
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Set the entrypoint
 # Create a non-root user and switch to it
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
-ENTRYPOINT ["docker-entrypoint.sh"]
+# ENTRYPOINT ["docker-entrypoint.sh"]
 
 # The command to start the application in production mode
 # This matches your 'start:prod' script.
