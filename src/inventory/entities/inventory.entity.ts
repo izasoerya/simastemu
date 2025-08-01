@@ -54,4 +54,7 @@ export class Inventories {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column('numeric', { nullable: true })
+  flagStatus?: number;
 }
