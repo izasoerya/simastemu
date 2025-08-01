@@ -31,8 +31,8 @@ services:
     container_name: simastemu-db
     env_file:
       - .env.development
-    # ports:
-    #   - '5432:5432'
+    ports:
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
