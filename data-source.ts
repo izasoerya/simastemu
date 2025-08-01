@@ -12,7 +12,7 @@ export default new DataSource({
   password: `${process.env.DB_PASSWORD}`,
   database: process.env.DB_NAME,
   synchronize: process.env.DB_SYNC! === 'true',
-  migrationsRun: true,
+  migrationsRun: false,
   migrations: ['dist/src/migrations/*.js'],
   entities: ['dist/**/*.entity.js'],
 });
