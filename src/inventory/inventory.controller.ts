@@ -28,18 +28,18 @@ export class InventoryController {
     @Req() req,
     @Body() body: CreateInventoryDto,
   ): Promise<ResponseInventoryDto> {
-    const createInventoryDto: CreateInventoryDto = {
+    const payload: CreateInventoryDto = {
       ...body,
       userUID: req.user.sub,
     };
 
-    Object.entries(createInventoryDto).forEach(([key, value]) => {
+    Object.entries(payload).forEach(([key, value]) => {
       if (value === null || value === undefined) {
         throw new BadRequestException(`Missing or invalid value for: ${key}`);
       }
     });
 
-    const res = await this.inventoryService.create(createInventoryDto);
+    const res = await this.inventoryService.create(payload);
     const { user, ...responseInventoryDto } = res;
     return responseInventoryDto;
   }
@@ -63,7 +63,14 @@ export class InventoryController {
   async patchInventory(
     @Body() body: PatchInventoryDto,
   ): Promise<ResponseInventoryDto> {
-    const res = await this.inventoryService.patch(body.id!, body);
+    const payload: PatchInventoryDto = {
+      ...body,
+    };
+    if (payload.id === null || payload.id === undefined) {
+      throw new BadRequestException('Missing id');
+    }
+
+    const res = await this.inventoryService.patch(payload.id!, payload);
     return res;
   }
 

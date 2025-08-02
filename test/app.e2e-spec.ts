@@ -26,21 +26,18 @@ describe('e2e', () => {
   });
 
   afterAll(async () => {
-    // Delete Database
     if (database) {
       await database.dropDatabase();
       await database.destroy();
     }
     await app.close();
 
-    // Delete file
     const filePath = path.resolve(__dirname, 'large-file.png');
     fs.unlink(filePath, (err) => {
       if (err && err.code !== 'ENOENT')
         console.error('Failed to delete file:', err);
     });
 
-    // Delete folder and contents recursively
     const uploadTestFolder = path.resolve(__dirname, '../uploads/test_db');
     fs.rm(uploadTestFolder, { recursive: true, force: true }, (err) => {
       if (err && err.code !== 'ENOENT')
@@ -118,8 +115,15 @@ describe('e2e', () => {
     it('/inventory/create (POST)', async () => {
       const payloadInventory = {
         name: 'Al-Maun',
+        ownerName: 'John Doe',
+        spptNumber: 'SPPT123456',
+        certificateNumber: 'CERT987654',
         latitude: -7.825525,
         longitude: 110.336756,
+        sizeArea: 1000,
+        landPrice: 50000000,
+        njopPrice: 45000000,
+        zonePrice: 47000000,
         imageURLs: [singlePath],
       };
       const response = await request(app.getHttpServer())
@@ -132,6 +136,15 @@ describe('e2e', () => {
       expect(response.body.latitude).toEqual(payloadInventory.latitude);
       expect(response.body.longitude).toEqual(payloadInventory.longitude);
       expect(response.body.imageURLs.length).toEqual(1);
+      expect(response.body.ownerName).toEqual(payloadInventory.ownerName);
+      expect(response.body.spptNumber).toEqual(payloadInventory.spptNumber);
+      expect(response.body.certificateNumber).toEqual(
+        payloadInventory.certificateNumber,
+      );
+      expect(response.body.sizeArea).toEqual(payloadInventory.sizeArea);
+      expect(response.body.landPrice).toEqual(payloadInventory.landPrice);
+      expect(response.body.njopPrice).toEqual(payloadInventory.njopPrice);
+      expect(response.body.zonePrice).toEqual(payloadInventory.zonePrice);
     });
 
     let inventoryResponse;
@@ -147,8 +160,18 @@ describe('e2e', () => {
 
     it('/inventory/patch (PATCH)', async () => {
       const patchTest = {
-        id: inventoryResponse.id,
+        id: inventoryResponse.body[0].id,
         name: 'HeadQuarters',
+        ownerName: 'Jane Doe',
+        spptNumber: 'SPPT654321',
+        certificateNumber: 'CERT123456',
+        latitude: -7.825525,
+        longitude: 110.336756,
+        sizeArea: 2000,
+        landPrice: 60000000,
+        njopPrice: 55000000,
+        zonePrice: 57000000,
+        imageURLs: [singlePath],
       };
       const response = await request(app.getHttpServer())
         .patch('/inventory/patch')
@@ -157,15 +180,13 @@ describe('e2e', () => {
         .expect(200);
 
       expect(response.body.name).toBe('HeadQuarters');
-    });
-
-    it('/inventory/delete (DELETE)', async () => {
-      console.log(inventoryResponse.body[0]);
-      const response = await request(app.getHttpServer())
-        .delete(`/inventory/delete/${inventoryResponse.body[0].id}`)
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
-      console.log(response);
+      expect(response.body.ownerName).toBe('Jane Doe');
+      expect(response.body.spptNumber).toBe('SPPT654321');
+      expect(response.body.certificateNumber).toBe('CERT123456');
+      expect(response.body.sizeArea).toBe(2000);
+      expect(response.body.landPrice).toBe(60000000);
+      expect(response.body.njopPrice).toBe(55000000);
+      expect(response.body.zonePrice).toBe(57000000);
     });
 
     // it('/file/delete (DELETE)', async () => {

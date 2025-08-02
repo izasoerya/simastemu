@@ -86,6 +86,22 @@ export class PatchInventoryDto {
   @Max(180)
   longitude?: number;
 
+  @IsNotEmpty()
+  @IsNumber()
+  sizeArea: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  landPrice: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  njopPrice: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  zonePrice: number;
+
   imageURLs?: string[];
 }
 
