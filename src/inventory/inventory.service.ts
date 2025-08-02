@@ -45,7 +45,17 @@ export class InventoryService {
       this.logger.error(`Inventory with ID ${id} not found`);
       throw new NotFoundException(`Inventory with id ${id} not found`);
     }
-    const updatedInventory = this.repo.merge(existingInventory, inventory);
+
+    const filteredInventory = Object.fromEntries(
+      Object.entries(inventory).filter(
+        ([_, value]) => value !== null && value !== undefined,
+      ),
+    );
+
+    const updatedInventory = this.repo.merge(
+      existingInventory,
+      filteredInventory,
+    );
     const saved = await this.repo.save(updatedInventory);
     this.logger.log(`Patched inventory with ID ${id} successfully`);
     return saved;
