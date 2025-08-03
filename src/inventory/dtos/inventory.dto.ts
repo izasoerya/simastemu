@@ -9,6 +9,7 @@ import {
   IsArray,
   IsEmpty,
 } from 'class-validator';
+import { Users } from 'src/user/entities/user.entity';
 
 export class CreateInventoryDto {
   @IsString()
@@ -168,6 +169,9 @@ export class ResponseInventoryDto {
 
   @IsNotEmpty()
   imageURLs: string[];
+
+  @IsNotEmpty()
+  user: Users;
 
   @IsNotEmpty()
   @IsDate()

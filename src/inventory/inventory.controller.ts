@@ -40,7 +40,7 @@ export class InventoryController {
     });
 
     const res = await this.inventoryService.create(payload);
-    const { user, ...responseInventoryDto } = res;
+    const { ...responseInventoryDto } = res;
     return responseInventoryDto;
   }
 
@@ -48,7 +48,7 @@ export class InventoryController {
   @Get('read')
   async getInventory(@Req() req): Promise<ResponseInventoryDto[]> {
     const inventories = await this.inventoryService.read(req.user.sub);
-    return inventories.map(({ user, ...rest }) => rest);
+    return inventories.map(({ ...rest }) => rest);
   }
 
   @UseGuards(AuthGuard)
