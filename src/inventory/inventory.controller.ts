@@ -61,6 +61,7 @@ export class InventoryController {
   @UseGuards(AuthGuard)
   @Patch('patch')
   async patchInventory(
+    @Req() req,
     @Body() body: PatchInventoryDto,
   ): Promise<ResponseInventoryDto> {
     const payload: PatchInventoryDto = {
@@ -68,8 +69,9 @@ export class InventoryController {
     };
     if (payload.id === null || payload.id === undefined) {
       throw new BadRequestException('Missing id');
+    } else if (payload.id != req.user.sub) {
+      throw new BadRequestException('Unathorized');
     }
-
     const res = await this.inventoryService.patch(payload.id!, payload);
     return res;
   }
