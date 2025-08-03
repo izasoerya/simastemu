@@ -5,6 +5,8 @@ import {
   Min,
   Max,
   IsString,
+  IsOptional,
+  IsArray,
 } from 'class-validator';
 
 export class CreateInventoryDto {
@@ -60,48 +62,56 @@ export class CreateInventoryDto {
 }
 
 export class PatchInventoryDto {
-  id?: string;
+  @IsString()
+  id: string;
 
+  @IsOptional()
+  @IsString()
   name?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  ownerName: string;
+  ownerName?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  spptNumber: string;
+  spptNumber?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  certificateNumber: string;
+  certificateNumber?: string;
 
+  @IsOptional()
   @IsNumber()
   @Min(-90)
   @Max(90)
   latitude?: number;
 
+  @IsOptional()
   @IsNumber()
   @Min(-180)
   @Max(180)
   longitude?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  sizeArea: number;
+  sizeArea?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  landPrice: number;
+  landPrice?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  njopPrice: number;
+  njopPrice?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  zonePrice: number;
+  zonePrice?: number;
 
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   imageURLs?: string[];
 }
 

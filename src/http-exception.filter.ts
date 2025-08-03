@@ -15,12 +15,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = 500;
-    let message = 'Internal server error';
+    let status;
+    let message;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      message = exception.message;
+      message = exception.getResponse();
     } else {
       const logPath = join(process.cwd(), 'error.log');
       const errorDetails = `[${new Date().toISOString()}] ${request.url}\n${JSON.stringify(exception, Object.getOwnPropertyNames(exception))}\n\n`;
