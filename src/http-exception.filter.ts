@@ -22,9 +22,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       status = exception.getStatus();
       message = exception.getResponse();
     } else {
-      const logPath = join(process.cwd(), 'error.log');
-      const errorDetails = `[${new Date().toISOString()}] ${request.url}\n${JSON.stringify(exception, Object.getOwnPropertyNames(exception))}\n\n`;
-      appendFileSync(logPath, errorDetails);
+      // const logPath = join(process.cwd(), 'error.log');
+      // const errorDetails = `[${new Date().toISOString()}] ${request.url}\n${JSON.stringify(exception, Object.getOwnPropertyNames(exception))}\n\n`;
+      // appendFileSync(logPath, errorDetails);
       status = 400;
       message = 'Bad request';
     }
