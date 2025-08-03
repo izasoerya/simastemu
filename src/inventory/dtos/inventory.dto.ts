@@ -7,6 +7,7 @@ import {
   IsString,
   IsOptional,
   IsArray,
+  IsEmpty,
 } from 'class-validator';
 
 export class CreateInventoryDto {
@@ -58,7 +59,8 @@ export class CreateInventoryDto {
   @IsNotEmpty()
   imageURLs: string[];
 
-  userUID: string;
+  @IsEmpty()
+  userUID?: string;
 }
 
 export class PatchInventoryDto {
