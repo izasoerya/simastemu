@@ -8,6 +8,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+const numericTransformer = {
+  to: (value?: number | null) => value,
+  from: (value?: string | null) => {
+    if (value === null || value === undefined) {
+      return value;
+    }
+    return Number(value);
+  },
+};
+
 @Entity()
 export class Inventories {
   @PrimaryGeneratedColumn('uuid')
@@ -16,8 +26,8 @@ export class Inventories {
   @Column()
   name: string;
 
-  @Column()
-  ownerName: string;
+  @ManyToOne(() => Users, (user) => user.inventories, { nullable: false })
+  owner: Users;
 
   @Column()
   spptNumber: string;
@@ -25,29 +35,34 @@ export class Inventories {
   @Column()
   certificateNumber: string;
 
-  @Column('numeric', { precision: 9, scale: 6 })
+  @Column('numeric', {
+    precision: 9,
+    scale: 6,
+    transformer: numericTransformer,
+  })
   latitude: number;
 
-  @Column('numeric', { precision: 9, scale: 6 })
+  @Column('numeric', {
+    precision: 9,
+    scale: 6,
+    transformer: numericTransformer,
+  })
   longitude: number;
 
-  @Column('numeric')
+  @Column('numeric', { transformer: numericTransformer })
   sizeArea: number;
 
-  @Column('numeric')
+  @Column('numeric', { transformer: numericTransformer })
   landPrice: number;
 
-  @Column('numeric')
+  @Column('numeric', { transformer: numericTransformer })
   njopPrice: number;
 
-  @Column('numeric')
+  @Column('numeric', { transformer: numericTransformer })
   zonePrice: number;
 
   @Column('text', { array: true, nullable: false })
   imageURLs: string[];
-
-  @ManyToOne(() => Users, (user) => user.inventories, { nullable: false })
-  user: Users;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
@@ -55,6 +70,6 @@ export class Inventories {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  @Column('numeric', { nullable: true })
+  @Column('numeric', { nullable: true, transformer: numericTransformer })
   flagStatus?: number;
 }
