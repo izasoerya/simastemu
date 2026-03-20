@@ -28,6 +28,6 @@ export class Users {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @OneToMany(() => Inventories, (inventory) => inventory.user)
+  @OneToMany(() => Inventories, (inventory) => inventory.owner)
   inventories: Inventories[];
 }
