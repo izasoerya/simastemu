@@ -16,9 +16,10 @@ export class InventoryService {
   async create(dto: CreateInventoryDto) {
     const newInventory = this.repo.create({
       ...dto,
-      user: { uid: dto.userUID },
+      owner: { uid: dto.ownerId },
     });
     const saved = await this.repo.save(newInventory);
+
     this.logger.log(
       `Created inventory successfully: ${saved.name} (ID: ${saved.id})`,
     );
@@ -27,37 +28,39 @@ export class InventoryService {
 
   async read(userId?: string) {
     if (userId) {
-      const inventories = await this.repo.findBy({ user: { uid: userId } });
+      const inventories = await this.repo.find({
+        where: { owner: { uid: userId } },
+        relations: { owner: true },
+      });
       this.logger.log(
         `Found ${inventories.length} inventories for user ${userId}`,
       );
       return inventories;
     } else {
-      const inventories = await this.repo.find();
+      const inventories = await this.repo.find({
+        relations: { owner: true },
+      });
       this.logger.log(`Found ${inventories.length} inventories in total`);
       return inventories;
     }
   }
 
-  async patch(id: string, inventory: PatchInventoryDto) {
-    const existingInventory = await this.repo.findOneBy({ id });
+  async patch(inventory: PatchInventoryDto) {
+    const existingInventory = await this.repo.findOne({
+      where: { id: inventory.id },
+      relations: { owner: true },
+    });
     if (!existingInventory) {
-      this.logger.error(`Inventory with ID ${id} not found`);
-      throw new NotFoundException(`Inventory with id ${id} not found`);
+      this.logger.error(`Inventory with ID ${inventory.id} not found`);
+      throw new NotFoundException(
+        `Inventory with id ${inventory.id} not found`,
+      );
     }
 
-    const filteredInventory = Object.fromEntries(
-      Object.entries(inventory).filter(
-        ([_, value]) => value !== null && value !== undefined,
-      ),
-    );
-
-    const updatedInventory = this.repo.merge(
-      existingInventory,
-      filteredInventory,
-    );
+    const updatedInventory = this.repo.merge(existingInventory, inventory);
     const saved = await this.repo.save(updatedInventory);
-    this.logger.log(`Patched inventory with ID ${id} successfully`);
+
+    this.logger.log(`Patched inventory with ID ${inventory.id} successfully`);
     return saved;
   }
 
