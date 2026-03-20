@@ -17,6 +17,8 @@ import { ConfigModule } from '@nestjs/config';
         password: `${process.env.POSTGRES_PASSWORD}`,
         database: process.env.POSTGRES_DB,
         synchronize: process.env.DB_SYNC! === 'true',
+        migrationsRun: true,
+        migrations: ['dist/migrations/*.js'],
         autoLoadEntities: true,
         entities: ['dist/**/*.entity.js'],
       }),
