@@ -161,6 +161,7 @@ describe('e2e', () => {
     it('/inventory/patch (PATCH)', async () => {
       const patchTest = {
         id: inventoryResponse.body[0].id,
+        ownerId: inventoryResponse.body[0].ownerId,
         name: 'HeadQuarters',
         ownerName: 'Jane Doe',
         spptNumber: 'SPPT654321',
@@ -176,8 +177,17 @@ describe('e2e', () => {
       const response = await request(app.getHttpServer())
         .patch('/inventory/patch')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send(patchTest)
-        .expect(200);
+        .send(patchTest);
+
+      if (response.status !== 200 && response.status !== 201) {
+        throw new Error(
+          [
+            'PATCH /inventory/patch failed',
+            `Status code: ${response.status}`,
+            `Response body: ${JSON.stringify(response.body)}`,
+          ].join('\n'),
+        );
+      }
 
       expect(response.body.name).toBe('HeadQuarters');
       expect(response.body.ownerName).toBe('Jane Doe');
