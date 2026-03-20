@@ -78,23 +78,23 @@ Authorization: Bearer <accessToken>
 
 ## Endpoints
 
-## 1) Health/Hello
+## 1) Health/Test Endpoint
 
 - Method: `GET`
-- Suffix URL: `/auth/`
+- Suffix URL: `/`
 - Description: Simple hello response from app service.
 - Auth: Not required
 
 ### Example Request
 
 ```bash
-curl -X GET http://localhost:3000/auth/
+curl -X GET http://localhost:3000/
 ```
 
 ### Response Example
 
 ```json
-"Hello World!"
+"GET success!"
 ```
 
 ---
