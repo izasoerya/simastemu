@@ -10,6 +10,13 @@ import {
   UseGuards,
   ForbiddenException,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import {
   CreateInventoryDto,
@@ -19,12 +26,16 @@ import {
 import { InventoryService } from './inventory.service';
 import { Inventories } from './entities/inventory.entity';
 
+@ApiTags('inventory')
+@ApiBearerAuth()
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @UseGuards(AuthGuard)
   @Post('create')
+  @ApiOperation({ summary: 'Create new inventory' })
+  @ApiResponse({ status: 201, type: ResponseInventoryDto })
   async createInventory(
     @Req() req,
     @Body() body: CreateInventoryDto,
@@ -43,6 +54,8 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Get('read')
+  @ApiOperation({ summary: 'Read inventories for authenticated user' })
+  @ApiResponse({ status: 200, type: ResponseInventoryDto, isArray: true })
   async getInventory(@Req() req): Promise<ResponseInventoryDto[]> {
     const inventories = await this.inventoryService.read(req.user.sub);
     return inventories.map((inventory) => {
@@ -55,6 +68,8 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Get('readAll')
+  @ApiOperation({ summary: 'Read all inventories' })
+  @ApiResponse({ status: 200, type: ResponseInventoryDto, isArray: true })
   async getAllInventory(): Promise<ResponseInventoryDto[]> {
     const res = await this.inventoryService.read(undefined);
     return res.map((inventory) => {
@@ -67,6 +82,8 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Patch('patch')
+  @ApiOperation({ summary: 'Patch inventory by id in request body' })
+  @ApiResponse({ status: 200, type: ResponseInventoryDto })
   async patchInventory(
     @Req() req,
     @Body() body: PatchInventoryDto,
@@ -84,6 +101,14 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Delete('delete/:id')
+  @ApiOperation({ summary: 'Delete inventory by id' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    required: true,
+    description: 'Inventory id',
+  })
+  @ApiResponse({ status: 200, description: 'Inventory deleted' })
   deleteInventory(@Param('id') id: string) {
     return this.inventoryService.remove(id);
   }
