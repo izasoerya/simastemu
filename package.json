@@ -9,7 +9,9 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./data-source.ts",
-    "migration:generate": "cross-env NODE_ENV=development npm run typeorm -- migration:generate",
+    "migration:create": "sh -c 'test -n \"$npm_config_name\" || (echo \"Usage: npm run migration:create --name=<migration_name>\" && exit 1); ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create src/migrations/$npm_config_name'",
+    "npm:migration:create": "npm run migration:create",
+    "migration:generate": "cross-env NODE_ENV=development npm run typeorm -- migration:generate src/migrations/AutoMigration",
     "migration:run:dev": "cross-env NODE_ENV=development npm run typeorm -- migration:run",
     "migration:run:prod": "cross-env NODE_ENV=production npm run typeorm -- migration:run",
     "migration:revert:dev": "cross-env NODE_ENV=development npm run typeorm -- migration:revert",
@@ -25,7 +27,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json",
-    "test:e2e:linux": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json"
+    "test:e2e:linux": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json",
+    "test:e2e:docker": "sh -c 'docker compose --env-file .env.test -f docker-compose.test.yml down -v --remove-orphans || true; docker compose --env-file .env.test -f docker-compose.test.yml up --build --force-recreate --abort-on-container-exit --exit-code-from backend-test; code=$?; docker compose --env-file .env.test -f docker-compose.test.yml down -v --remove-orphans; exit $code'"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -83,7 +86,7 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

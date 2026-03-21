@@ -8,7 +8,7 @@ import {
   Post,
   Req,
   UseGuards,
-  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import {
@@ -17,6 +17,7 @@ import {
   ResponseInventoryDto,
 } from './dtos/inventory.dto';
 import { InventoryService } from './inventory.service';
+import { Inventories } from './entities/inventory.entity';
 
 @Controller('inventory')
 export class InventoryController {
@@ -30,48 +31,55 @@ export class InventoryController {
   ): Promise<ResponseInventoryDto> {
     const payload: CreateInventoryDto = {
       ...body,
-      userUID: req.user.sub,
+      ownerId: req.user.sub,
     };
+    const inventory: Inventories = await this.inventoryService.create(payload);
 
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value === null || value === undefined) {
-        throw new BadRequestException(`Missing or invalid value for: ${key}`);
-      }
-    });
-
-    const res = await this.inventoryService.create(payload);
-    const { user, ...responseInventoryDto } = res;
-    return responseInventoryDto;
+    return {
+      ...inventory,
+      ownerId: inventory.owner.uid,
+    };
   }
 
   @UseGuards(AuthGuard)
   @Get('read')
   async getInventory(@Req() req): Promise<ResponseInventoryDto[]> {
     const inventories = await this.inventoryService.read(req.user.sub);
-    return inventories.map(({ user, ...rest }) => rest);
+    return inventories.map((inventory) => {
+      return {
+        ...inventory,
+        ownerId: inventory.owner.uid,
+      };
+    });
   }
 
   @UseGuards(AuthGuard)
   @Get('readAll')
   async getAllInventory(): Promise<ResponseInventoryDto[]> {
     const res = await this.inventoryService.read(undefined);
-    return res;
+    return res.map((inventory) => {
+      return {
+        ...inventory,
+        ownerId: inventory.owner.uid,
+      };
+    });
   }
 
   @UseGuards(AuthGuard)
   @Patch('patch')
   async patchInventory(
+    @Req() req,
     @Body() body: PatchInventoryDto,
   ): Promise<ResponseInventoryDto> {
-    const payload: PatchInventoryDto = {
-      ...body,
-    };
-    if (payload.id === null || payload.id === undefined) {
-      throw new BadRequestException('Missing id');
+    if (body.ownerId !== req.user.sub) {
+      throw new ForbiddenException('User did not own this inventory');
     }
 
-    const res = await this.inventoryService.patch(payload.id!, payload);
-    return res;
+    const inventory = await this.inventoryService.patch(body);
+    return {
+      ...inventory,
+      ownerId: inventory.owner.uid,
+    };
   }
 
   @UseGuards(AuthGuard)

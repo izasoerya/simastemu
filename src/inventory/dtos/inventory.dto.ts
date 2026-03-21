@@ -7,6 +7,7 @@ import {
   IsString,
   IsOptional,
   IsArray,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateInventoryDto {
@@ -14,9 +15,9 @@ export class CreateInventoryDto {
   @IsNotEmpty()
   name: string;
 
-  @IsString()
   @IsNotEmpty()
-  ownerName: string;
+  @IsUUID()
+  ownerId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -55,23 +56,21 @@ export class CreateInventoryDto {
   zonePrice: number;
 
   @IsNotEmpty()
-  @IsNotEmpty()
   imageURLs: string[];
-
-  userUID: string;
 }
 
 export class PatchInventoryDto {
-  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
   id: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  ownerId: string;
 
   @IsOptional()
   @IsString()
   name?: string;
-
-  @IsOptional()
-  @IsString()
-  ownerName?: string;
 
   @IsOptional()
   @IsString()
@@ -116,17 +115,17 @@ export class PatchInventoryDto {
 }
 
 export class ResponseInventoryDto {
-  @IsString()
   @IsNotEmpty()
+  @IsUUID()
   id: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  ownerId: string;
 
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  ownerName: string;
 
   @IsString()
   @IsNotEmpty()

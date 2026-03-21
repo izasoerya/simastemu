@@ -17,25 +17,17 @@ jobs:
       - name: 🟢 Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
 
       - name: 📝 Write .env.production from secret
         run: echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
 
-      - name: 📦 Parse .env.production into environment variables
+      - name: 📦 Export .env.production
         run: |
-          set -a
-          source .env.production
-          set +a
-          # Export all non-empty, non-comment variables to GITHUB_ENV
-          grep -v '^\s*#' .env.production | grep -E '^\s*[A-Za-z_][A-Za-z0-9_]*=' | while IFS= read -r line; do
-            key=$(echo "$line" | cut -d= -f1 | xargs)
-            value=$(echo "$line" | cut -d= -f2- | xargs)
-            echo "$key=$value" >> $GITHUB_ENV
-          done
+          grep -v '^#' .env.production | grep -E '^[A-Za-z_][A-Za-z0-9_]*=' >> $GITHUB_ENV
 
-      - name: 🚀 Start PostgreSQL service manually
+      - name: 🚀 Start PostgreSQL
         run: |
           docker run -d \
             --name postgres \
@@ -43,28 +35,24 @@ jobs:
             -e POSTGRES_PASSWORD=$DB_PASSWORD \
             -e POSTGRES_DB=$DB_NAME \
             -p $DB_PORT:5432 \
-            --health-cmd="pg_isready" \
+            --health-cmd="pg_isready -U $DB_USERNAME" \
             --health-interval=10s \
             --health-timeout=5s \
             --health-retries=5 \
             postgres:13
 
-      - name: 🕒 Wait for PostgreSQL to be healthy
+      - name: 🕒 Wait for PostgreSQL
         run: |
           for i in {1..10}; do
-            if docker exec postgres pg_isready; then
-              echo "✅ Postgres is ready"
+            if docker exec postgres pg_isready -U $DB_USERNAME; then
+              echo "Postgres is ready"
               break
             fi
-            echo "⏳ Waiting for Postgres..."
             sleep 3
           done
 
       - name: 📦 Install dependencies
         run: npm ci
-
-      - name: 📜 Log installed packages
-        run: npm list
 
       - name: 🏗️ Build app
         run: npm run build

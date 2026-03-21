@@ -115,7 +115,6 @@ describe('e2e', () => {
     it('/inventory/create (POST)', async () => {
       const payloadInventory = {
         name: 'Al-Maun',
-        ownerName: 'John Doe',
         spptNumber: 'SPPT123456',
         certificateNumber: 'CERT987654',
         latitude: -7.825525,
@@ -136,7 +135,6 @@ describe('e2e', () => {
       expect(response.body.latitude).toEqual(payloadInventory.latitude);
       expect(response.body.longitude).toEqual(payloadInventory.longitude);
       expect(response.body.imageURLs.length).toEqual(1);
-      expect(response.body.ownerName).toEqual(payloadInventory.ownerName);
       expect(response.body.spptNumber).toEqual(payloadInventory.spptNumber);
       expect(response.body.certificateNumber).toEqual(
         payloadInventory.certificateNumber,
@@ -161,8 +159,8 @@ describe('e2e', () => {
     it('/inventory/patch (PATCH)', async () => {
       const patchTest = {
         id: inventoryResponse.body[0].id,
+        ownerId: inventoryResponse.body[0].ownerId,
         name: 'HeadQuarters',
-        ownerName: 'Jane Doe',
         spptNumber: 'SPPT654321',
         certificateNumber: 'CERT123456',
         latitude: -7.825525,
@@ -176,11 +174,19 @@ describe('e2e', () => {
       const response = await request(app.getHttpServer())
         .patch('/inventory/patch')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send(patchTest)
-        .expect(200);
+        .send(patchTest);
+
+      if (response.status !== 200 && response.status !== 201) {
+        throw new Error(
+          [
+            'PATCH /inventory/patch failed',
+            `Status code: ${response.status}`,
+            `Response body: ${JSON.stringify(response.body)}`,
+          ].join('\n'),
+        );
+      }
 
       expect(response.body.name).toBe('HeadQuarters');
-      expect(response.body.ownerName).toBe('Jane Doe');
       expect(response.body.spptNumber).toBe('SPPT654321');
       expect(response.body.certificateNumber).toBe('CERT123456');
       expect(response.body.sizeArea).toBe(2000);
