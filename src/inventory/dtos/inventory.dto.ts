@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDate,
   IsNotEmpty,
@@ -9,77 +9,77 @@ import {
   IsOptional,
   IsArray,
   IsUUID,
+  IsEmpty,
 } from 'class-validator';
 
 export class CreateInventoryDto {
   @IsString()
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   name: string;
 
-  @IsNotEmpty()
-  @IsUUID()
+  @IsEmpty({ message: 'ownerId is handled by Backend' })
   @ApiPropertyOptional()
   ownerId: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   spptNumber: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   certificateNumber: string;
 
   @IsNotEmpty()
   @IsNumber()
   @Min(-90)
   @Max(90)
-  @ApiPropertyOptional()
+  @ApiProperty()
   latitude: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Min(-180)
   @Max(180)
-  @ApiPropertyOptional()
+  @ApiProperty()
   longitude: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   sizeArea: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   landPrice: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   njopPrice: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   zonePrice: number;
 
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   imageURLs: string[];
 }
 
 export class PatchInventoryDto {
   @IsNotEmpty()
   @IsUUID()
-  @ApiPropertyOptional()
+  @ApiProperty()
   id: string;
 
   @IsNotEmpty()
   @IsUUID()
-  @ApiPropertyOptional()
+  @ApiProperty()
   ownerId: string;
 
   @IsOptional()
@@ -141,74 +141,74 @@ export class PatchInventoryDto {
 export class ResponseInventoryDto {
   @IsNotEmpty()
   @IsUUID()
-  @ApiPropertyOptional()
+  @ApiProperty()
   id: string;
 
   @IsNotEmpty()
   @IsUUID()
-  @ApiPropertyOptional()
+  @ApiProperty()
   ownerId: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   name: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   spptNumber: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   certificateNumber: string;
 
   @IsNotEmpty()
   @IsNumber()
   @Min(-90)
   @Max(90)
-  @ApiPropertyOptional()
+  @ApiProperty()
   latitude: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Min(-180)
   @Max(180)
-  @ApiPropertyOptional()
+  @ApiProperty()
   longitude: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   sizeArea: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   landPrice: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   njopPrice: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @ApiPropertyOptional()
+  @ApiProperty()
   zonePrice: number;
 
   @IsNotEmpty()
-  @ApiPropertyOptional()
+  @ApiProperty()
   imageURLs: string[];
 
   @IsNotEmpty()
   @IsDate()
-  @ApiPropertyOptional()
+  @ApiProperty()
   createdAt: Date;
 
   @IsNotEmpty()
   @IsDate()
-  @ApiPropertyOptional()
+  @ApiProperty()
   updatedAt: Date;
 }
