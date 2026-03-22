@@ -26,8 +26,8 @@ import {
 import { InventoryService } from './inventory.service';
 import { Inventories } from './entities/inventory.entity';
 
+@ApiBearerAuth('jwt')
 @ApiTags('inventory')
-@ApiBearerAuth()
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
@@ -58,11 +58,13 @@ export class InventoryController {
   @ApiResponse({ status: 200, type: ResponseInventoryDto, isArray: true })
   async getInventory(@Req() req): Promise<ResponseInventoryDto[]> {
     const inventories = await this.inventoryService.read(req.user.sub);
-    return inventories.map((inventory) => {
-      return {
-        ...inventory,
-        ownerId: inventory.owner.uid,
+    return inventories.map((inventory: Inventories) => {
+      const { owner, ...inventoryResponseDto } = inventory; // Strip owner entity
+      const response: ResponseInventoryDto = {
+        ...inventoryResponseDto,
+        ownerId: owner.uid,
       };
+      return response;
     });
   }
 
@@ -73,10 +75,12 @@ export class InventoryController {
   async getAllInventory(): Promise<ResponseInventoryDto[]> {
     const res = await this.inventoryService.read(undefined);
     return res.map((inventory) => {
-      return {
-        ...inventory,
-        ownerId: inventory.owner.uid,
+      const { owner, ...inventoryResponseDto } = inventory; // Strip owner entity
+      const response: ResponseInventoryDto = {
+        ...inventoryResponseDto,
+        ownerId: owner.uid,
       };
+      return response;
     });
   }
 
@@ -93,10 +97,12 @@ export class InventoryController {
     }
 
     const inventory = await this.inventoryService.patch(body);
-    return {
-      ...inventory,
-      ownerId: inventory.owner.uid,
+    const { owner, ...inventoryResponseDto } = inventory; // Strip owner entity
+    const response: ResponseInventoryDto = {
+      ...inventoryResponseDto,
+      ownerId: owner.uid,
     };
+    return response;
   }
 
   @UseGuards(AuthGuard)
