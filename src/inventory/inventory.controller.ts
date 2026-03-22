@@ -10,13 +10,7 @@ import {
   UseGuards,
   ForbiddenException,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import {
   CreateInventoryDto,
@@ -34,7 +28,6 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Post('create')
-  @ApiOperation({ summary: 'Create new inventory' })
   @ApiResponse({ status: 201, type: ResponseInventoryDto })
   async createInventory(
     @Req() req,
@@ -54,7 +47,6 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Get('read')
-  @ApiOperation({ summary: 'Read inventories for authenticated user' })
   @ApiResponse({ status: 200, type: ResponseInventoryDto, isArray: true })
   async getInventory(@Req() req): Promise<ResponseInventoryDto[]> {
     const inventories = await this.inventoryService.read(req.user.sub);
@@ -70,7 +62,6 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Get('readAll')
-  @ApiOperation({ summary: 'Read all inventories' })
   @ApiResponse({ status: 200, type: ResponseInventoryDto, isArray: true })
   async getAllInventory(): Promise<ResponseInventoryDto[]> {
     const res = await this.inventoryService.read(undefined);
@@ -86,7 +77,6 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Patch('patch')
-  @ApiOperation({ summary: 'Patch inventory by id in request body' })
   @ApiResponse({ status: 200, type: ResponseInventoryDto })
   async patchInventory(
     @Req() req,
@@ -107,7 +97,6 @@ export class InventoryController {
 
   @UseGuards(AuthGuard)
   @Delete('delete/:id')
-  @ApiOperation({ summary: 'Delete inventory by id' })
   @ApiParam({
     name: 'id',
     type: String,
