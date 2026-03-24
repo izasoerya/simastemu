@@ -1,94 +1,61 @@
 # SIMASTEMU API Documentation
 
-## Base URL
+Backend for SimasetMU apps development.
 
-- Local (docker-compose): `http://localhost:3000`
-- No global prefix is configured in app bootstrap, so each route is used as-is.
-
-## Full Configuration
-
-### Runtime and Core Behavior
+## Runtime Configuration
 
 - Framework: NestJS 11
-- Node image (dev): `node:20-alpine`
-- Port: `process.env.PORT` (app listens on this port)
+- App port: process.env.PORT
 - Global validation pipe:
-  - `whitelist: true`
-  - `forbidNonWhitelisted: true`
-  - `transform: true`
-- Global exception filter response format:
+  - whitelist: true
+  - forbidNonWhitelisted: true
+  - transform: true
 
-```json
-{
-  "statusCode": 400,
-  "timestamp": "2026-03-20T08:00:00.000Z",
-  "path": "/inventory/create",
-  "message": "Bad request"
-}
-```
+## Swagger Docs
 
-### Environment Variables
+- URL: /docs
+- Protected with HTTP Basic Auth.
+- Credentials source:
+  - Username: process.env.DOCS_USER
+  - Password: process.env.DOCS_PASSWORD
 
-Set these in `.env.development` / `.env.production` (loaded by `NODE_ENV`):
-
-- `PORT`: API port (example: `3000`)
-- `NODE_ENV`: `development` or `production`
-- `JWT_KEY`: JWT signing and verification secret
-- `UPLOAD_DIR`: upload base directory (example: `./uploads`)
-- `DB_HOST`: PostgreSQL host (`db` in docker compose)
-- `DB_PORT`: PostgreSQL port (example: `5432`)
-- `DB_USERNAME`: DB user
-- `DB_PASSWORD`: DB password
-- `DB_NAME`: DB name
-- `DB_NAME_TEST`: test DB name (used in `src/config/configuration.ts`)
-- `DB_SYNC`: `true` or `false` for TypeORM synchronize
-- PostgreSQL container also consumes `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` via env file.
-
-### Database (TypeORM)
-
-- Engine: PostgreSQL
-- `autoLoadEntities: true`
-- Migrations run on app startup: `migrationsRun: true`
-- Migration build path: `dist/migrations/*.js`
-- Entities build path: `dist/**/*.entity.js`
-
-### Authentication
+## Authentication
 
 - Auth type: JWT Bearer token
-- Sign-in response provides `accessToken`
-- JWT sign options:
-  - `secret`: `process.env.JWT_KEY`
-  - `expiresIn`: `3600s`
-- Protected routes require header:
+- Sign-in returns accessToken
+- JWT secret: process.env.JWT_KEY
+- JWT expiry: 3600s
+
+Authorization header format:
 
 ```http
 Authorization: Bearer <accessToken>
 ```
 
-### File Upload Rules
+## File Upload Rules
 
-- Allowed MIME types: `image/jpg`, `image/jpeg`, `image/png`
-- Single upload field name: `file`
-- Multi upload field name: `files`
-- Multi upload max count: `10`
+- Allowed MIME types: image/jpg, image/jpeg, image/png
+- Single upload field: file
+- Multi upload field: files
+- Multi upload max count: 10
 - Storage path format:
-  - `${UPLOAD_DIR}/inventory/:type/:type_<timestamp_uuid_originalname>.<ext>`
+  - ${UPLOAD*DIR}/inventory/:type/:type*<generated>.<ext>
 
 ---
 
 ## Endpoints
 
-## 1) Health/Test Endpoint
+## 1) Test GET
 
-- Method: `GET`
-- Suffix URL: `/`
-- Description: Simple hello response from app service.
+- Method: GET
+- Suffix URL: /test
+- Description: Returns a static health-like message.
 - Auth: Not required
 
 ### Example Request
 
 ```bash
-curl -X GET http://localhost:3000/
+curl -X GET http://localhost:3000/test
 ```
 
 ### Response Example
@@ -99,11 +66,44 @@ curl -X GET http://localhost:3000/
 
 ---
 
-## 2) Sign In
+## 2) Test POST
 
-- Method: `POST`
-- Suffix URL: `/auth/sign-in`
-- Description: Authenticate existing user and return JWT token.
+- Method: POST
+- Suffix URL: /test
+- Description: Echoes payload data with BACKEND prefix.
+- Auth: Not required
+
+### Request Body
+
+```json
+{
+  "data": "hello"
+}
+```
+
+### Example Request
+
+```bash
+curl -X POST http://localhost:3000/test \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": "hello"
+  }'
+```
+
+### Response Example
+
+```json
+"BACKEND: hello"
+```
+
+---
+
+## 3) Sign In
+
+- Method: POST
+- Suffix URL: /auth/sign-in
+- Description: Authenticate user and return JWT.
 - Auth: Not required
 
 ### Request Body
@@ -134,23 +134,28 @@ curl -X POST http://localhost:3000/auth/sign-in \
 }
 ```
 
-### Common Error Example
+### Common Error Examples
+
+```json
+{
+  "statusCode": 400,
+  "message": "User not found"
+}
+```
 
 ```json
 {
   "statusCode": 403,
-  "timestamp": "2026-03-20T08:00:00.000Z",
-  "path": "/auth/sign-in",
   "message": "Wrong password"
 }
 ```
 
 ---
 
-## 3) Sign Up
+## 4) Sign Up
 
-- Method: `POST`
-- Suffix URL: `/auth/sign-up`
+- Method: POST
+- Suffix URL: /auth/sign-up
 - Description: Register a new user account.
 - Auth: Not required
 
@@ -190,27 +195,26 @@ curl -X POST http://localhost:3000/auth/sign-up \
 ```json
 {
   "statusCode": 400,
-  "timestamp": "2026-03-20T08:00:00.000Z",
-  "path": "/auth/sign-up",
   "message": "Email already used."
 }
 ```
 
 ---
 
-## 4) Create Inventory
+## 5) Create Inventory
 
-- Method: `POST`
-- Suffix URL: `/inventory/create`
+- Method: POST
+- Suffix URL: /inventory/create
 - Description: Create inventory item for authenticated user.
 - Auth: Required (Bearer token)
 
 ### Request Body
 
+ownerId must not be sent by client. It is injected from JWT subject.
+
 ```json
 {
   "name": "Tanah Kavling A1",
-  "ownerName": "John Doe",
   "spptNumber": "SPPT-001",
   "certificateNumber": "CERT-001",
   "latitude": -6.2001,
@@ -219,10 +223,7 @@ curl -X POST http://localhost:3000/auth/sign-up \
   "landPrice": 150000000,
   "njopPrice": 120000000,
   "zonePrice": 140000000,
-  "imageURLs": [
-    "depan_1711111111111_uuid_img1.jpg",
-    "samping_1711111112222_uuid_img2.jpg"
-  ]
+  "imageURLs": ["depan_1711111111111_uuid_img1.jpg"]
 }
 ```
 
@@ -234,7 +235,6 @@ curl -X POST http://localhost:3000/inventory/create \
   -H "Authorization: Bearer <accessToken>" \
   -d '{
     "name": "Tanah Kavling A1",
-    "ownerName": "John Doe",
     "spptNumber": "SPPT-001",
     "certificateNumber": "CERT-001",
     "latitude": -6.2001,
@@ -252,8 +252,8 @@ curl -X POST http://localhost:3000/inventory/create \
 ```json
 {
   "id": "f35f9556-7a74-4f95-9b6d-5c6a16f6f8fb",
+  "ownerId": "9f656e8b-f131-4630-90f2-bf8487d2d77f",
   "name": "Tanah Kavling A1",
-  "ownerName": "John Doe",
   "spptNumber": "SPPT-001",
   "certificateNumber": "CERT-001",
   "latitude": -6.2001,
@@ -263,9 +263,6 @@ curl -X POST http://localhost:3000/inventory/create \
   "njopPrice": 120000000,
   "zonePrice": 140000000,
   "imageURLs": ["depan_1711111111111_uuid_img1.jpg"],
-  "user": {
-    "uid": "9f656e8b-f131-4630-90f2-bf8487d2d77f"
-  },
   "createdAt": "2026-03-20T08:00:00.000Z",
   "updatedAt": "2026-03-20T08:00:00.000Z"
 }
@@ -273,10 +270,10 @@ curl -X POST http://localhost:3000/inventory/create \
 
 ---
 
-## 5) Read My Inventory
+## 6) Read My Inventory
 
-- Method: `GET`
-- Suffix URL: `/inventory/read`
+- Method: GET
+- Suffix URL: /inventory/read
 - Description: Get inventories belonging to authenticated user.
 - Auth: Required (Bearer token)
 
@@ -293,8 +290,8 @@ curl -X GET http://localhost:3000/inventory/read \
 [
   {
     "id": "f35f9556-7a74-4f95-9b6d-5c6a16f6f8fb",
+    "ownerId": "9f656e8b-f131-4630-90f2-bf8487d2d77f",
     "name": "Tanah Kavling A1",
-    "ownerName": "John Doe",
     "spptNumber": "SPPT-001",
     "certificateNumber": "CERT-001",
     "latitude": -6.2001,
@@ -304,9 +301,6 @@ curl -X GET http://localhost:3000/inventory/read \
     "njopPrice": 120000000,
     "zonePrice": 140000000,
     "imageURLs": ["depan_1711111111111_uuid_img1.jpg"],
-    "user": {
-      "uid": "9f656e8b-f131-4630-90f2-bf8487d2d77f"
-    },
     "createdAt": "2026-03-20T08:00:00.000Z",
     "updatedAt": "2026-03-20T08:00:00.000Z"
   }
@@ -315,10 +309,10 @@ curl -X GET http://localhost:3000/inventory/read \
 
 ---
 
-## 6) Read All Inventory
+## 7) Read All Inventory
 
-- Method: `GET`
-- Suffix URL: `/inventory/readAll`
+- Method: GET
+- Suffix URL: /inventory/readAll
 - Description: Get all inventories from all users.
 - Auth: Required (Bearer token)
 
@@ -335,8 +329,8 @@ curl -X GET http://localhost:3000/inventory/readAll \
 [
   {
     "id": "f35f9556-7a74-4f95-9b6d-5c6a16f6f8fb",
+    "ownerId": "9f656e8b-f131-4630-90f2-bf8487d2d77f",
     "name": "Tanah Kavling A1",
-    "ownerName": "John Doe",
     "spptNumber": "SPPT-001",
     "certificateNumber": "CERT-001",
     "latitude": -6.2001,
@@ -346,9 +340,6 @@ curl -X GET http://localhost:3000/inventory/readAll \
     "njopPrice": 120000000,
     "zonePrice": 140000000,
     "imageURLs": ["depan_1711111111111_uuid_img1.jpg"],
-    "user": {
-      "uid": "9f656e8b-f131-4630-90f2-bf8487d2d77f"
-    },
     "createdAt": "2026-03-20T08:00:00.000Z",
     "updatedAt": "2026-03-20T08:00:00.000Z"
   }
@@ -357,18 +348,21 @@ curl -X GET http://localhost:3000/inventory/readAll \
 
 ---
 
-## 7) Patch Inventory
+## 8) Patch Inventory
 
-- Method: `PATCH`
-- Suffix URL: `/inventory/patch`
+- Method: PATCH
+- Suffix URL: /inventory/patch
 - Description: Partially update inventory fields.
 - Auth: Required (Bearer token)
 
 ### Request Body
 
+ownerId must match JWT subject, otherwise request is rejected with 403.
+
 ```json
 {
   "id": "f35f9556-7a74-4f95-9b6d-5c6a16f6f8fb",
+  "ownerId": "9f656e8b-f131-4630-90f2-bf8487d2d77f",
   "name": "Tanah Kavling A1 - Updated",
   "zonePrice": 145000000,
   "imageURLs": [
@@ -386,6 +380,7 @@ curl -X PATCH http://localhost:3000/inventory/patch \
   -H "Authorization: Bearer <accessToken>" \
   -d '{
     "id": "f35f9556-7a74-4f95-9b6d-5c6a16f6f8fb",
+    "ownerId": "9f656e8b-f131-4630-90f2-bf8487d2d77f",
     "name": "Tanah Kavling A1 - Updated",
     "zonePrice": 145000000
   }'
@@ -396,8 +391,8 @@ curl -X PATCH http://localhost:3000/inventory/patch \
 ```json
 {
   "id": "f35f9556-7a74-4f95-9b6d-5c6a16f6f8fb",
+  "ownerId": "9f656e8b-f131-4630-90f2-bf8487d2d77f",
   "name": "Tanah Kavling A1 - Updated",
-  "ownerName": "John Doe",
   "spptNumber": "SPPT-001",
   "certificateNumber": "CERT-001",
   "latitude": -6.2001,
@@ -410,24 +405,33 @@ curl -X PATCH http://localhost:3000/inventory/patch \
     "depan_1711111111111_uuid_img1.jpg",
     "belakang_1711111113333_uuid_img3.jpg"
   ],
-  "user": {
-    "uid": "9f656e8b-f131-4630-90f2-bf8487d2d77f"
-  },
   "createdAt": "2026-03-20T08:00:00.000Z",
   "updatedAt": "2026-03-20T09:00:00.000Z"
 }
 ```
 
-### Behavior Note
+### Common Error Examples
 
-Current controller check compares `body.id` with JWT subject (`req.user.sub`) before patching. If they differ, it returns `BadRequestException("Unathorized")`.
+```json
+{
+  "statusCode": 403,
+  "message": "User did not own this inventory"
+}
+```
+
+```json
+{
+  "statusCode": 404,
+  "message": "Inventory with id <id> not found"
+}
+```
 
 ---
 
-## 8) Delete Inventory
+## 9) Delete Inventory
 
-- Method: `DELETE`
-- Suffix URL: `/inventory/delete/:id`
+- Method: DELETE
+- Suffix URL: /inventory/delete/:id
 - Description: Delete inventory by ID.
 - Auth: Required (Bearer token)
 
@@ -449,51 +453,50 @@ curl -X DELETE http://localhost:3000/inventory/delete/f35f9556-7a74-4f95-9b6d-5c
 
 ---
 
-## 9) Get File
+## 10) Get File
 
-- Method: `GET`
-- Suffix URL: `/file/get/:path`
-- Description: Read uploaded file stream from storage.
+- Method: GET
+- Suffix URL: /file/get/:path
+- Description: Return uploaded file as stream.
 - Auth: Not required
 
 ### Path Pattern
 
-- `:path` follows generated filename pattern: `:type_<timestamp_uuid_originalname>.<ext>`
+- :path must be the stored filename, for example:
+  - depan_1711111111111_uuid_sample.jpg
 
 ### Example Request
 
 ```bash
-curl -X GET "http://localhost:3000/file/get/depan_1711111111111_uuid_example.jpg" --output image.jpg
+curl -X GET "http://localhost:3000/file/get/depan_1711111111111_uuid_sample.jpg" --output image.jpg
 ```
 
 ### Response Example
 
-- Binary stream (`StreamableFile`) with file content.
+- Binary stream (StreamableFile)
 
 ### Common Error Example
 
 ```json
 {
   "statusCode": 404,
-  "timestamp": "2026-03-20T08:00:00.000Z",
-  "path": "/file/get/depan_1711111111111_uuid_example.jpg",
   "message": "File not found"
 }
 ```
 
 ---
 
-## 10) Upload Single File
+## 11) Upload Single File
 
-- Method: `POST`
-- Suffix URL: `/file/upload/:type`
+- Method: POST
+- Suffix URL: /file/upload/:type
 - Description: Upload one image file.
 - Auth: Required (Bearer token)
-- Content-Type: `multipart/form-data`
+- Content-Type: multipart/form-data
 
 ### Form Fields
 
-- `file`: image file (`jpg`, `jpeg`, `png`)
+- file: image file (jpg, jpeg, png)
 
 ### Example Request
 
@@ -516,17 +519,17 @@ curl -X POST "http://localhost:3000/file/upload/depan" \
 
 ---
 
-## 11) Upload Multiple Files
+## 12) Upload Multiple Files
 
-- Method: `POST`
-- Suffix URL: `/file/uploads/:type`
+- Method: POST
+- Suffix URL: /file/uploads/:type
 - Description: Upload up to 10 image files.
 - Auth: Required (Bearer token)
-- Content-Type: `multipart/form-data`
+- Content-Type: multipart/form-data
 
 ### Form Fields
 
-- `files`: image files (array, max 10)
+- files: image files array (max 10)
 
 ### Example Request
 
@@ -554,16 +557,17 @@ curl -X POST "http://localhost:3000/file/uploads/depan" \
 
 ---
 
-## Route Summary (Suffix URL)
+## Route Summary
 
-- `GET /auth/`
-- `POST /auth/sign-in`
-- `POST /auth/sign-up`
-- `POST /inventory/create`
-- `GET /inventory/read`
-- `GET /inventory/readAll`
-- `PATCH /inventory/patch`
-- `DELETE /inventory/delete/:id`
-- `GET /file/get/:path`
-- `POST /file/upload/:type`
-- `POST /file/uploads/:type`
+- GET /test
+- POST /test
+- POST /auth/sign-in
+- POST /auth/sign-up
+- POST /inventory/create
+- GET /inventory/read
+- GET /inventory/readAll
+- PATCH /inventory/patch
+- DELETE /inventory/delete/:id
+- GET /file/get/:path
+- POST /file/upload/:type
+- POST /file/uploads/:type
