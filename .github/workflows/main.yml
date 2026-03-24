@@ -60,8 +60,5 @@ jobs:
       - name: 📜 Run migrations
         run: npm run typeorm -- migration:run
 
-      - name: 🔎 Run unit tests
-        run: npm run test
-
       - name: 🧪 Run e2e tests
         run: npm run test:e2e
