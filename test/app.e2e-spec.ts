@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
@@ -14,12 +14,19 @@ describe('e2e', () => {
   let singlePath: string;
   let multiplePath: string[];
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     await app.init();
 
     database = moduleFixture.get<DataSource>(DataSource);
@@ -45,14 +52,14 @@ describe('e2e', () => {
     });
   });
 
-  describe('e2e all', () => {
+  describe('e2e auth', () => {
     const payload = {
       name: 'test',
       email: 'test@gmail.com',
       password: 'hashed',
     };
 
-    it('/auth/sign-up (POST)', async () => {
+    it('[SUCCESS] /auth/sign-up (POST)', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/sign-up')
         .send(payload)
@@ -62,7 +69,29 @@ describe('e2e', () => {
       expect(response.body.email).toEqual('test@gmail.com');
     });
 
-    it('/auth/sign-in (POST)', async () => {
+    it('[FAILED] /auth/sign-up (POST) -> Not an email', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/sign-up')
+        .send({
+          name: payload.name,
+          email: 'not_an_email_123',
+          password: payload.password,
+        })
+        .expect(400);
+    });
+
+    it('[FAILED] /auth/sign-up (POST) -> Weak password', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/sign-up')
+        .send({
+          name: payload.name,
+          email: payload.email,
+          password: 'weak',
+        })
+        .expect(400);
+    });
+
+    it('[SUCCESS] /auth/sign-in (POST)', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/sign-in')
         .send({
@@ -75,6 +104,38 @@ describe('e2e', () => {
       accessToken = response.body.accessToken;
     });
 
+    it('[FAILED] /auth/sign-in (POST) -> Unknown email', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send({
+          email: 'Wrong_email@gmail.com',
+          password: payload.password,
+        })
+        .expect(401);
+    });
+
+    it('[FAILED] /auth/sign-in (POST) -> Invalid payload', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send({
+          emailed: payload.email,
+          password: payload.password,
+        })
+        .expect(400);
+    });
+
+    it('[SUCCESS] auth/forgot-password (POST)', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/forgot-password')
+        .send({
+          email: payload.email,
+        })
+        .expect(201);
+      expect(response.body).toBe(true);
+    });
+  });
+
+  describe('e2e file', () => {
     it('/file/upload (POST)', async () => {
       const filePath = './test/large-file.png';
       const sizeInBytes = 1024 * 1024 + 1; // >1MB
@@ -111,7 +172,9 @@ describe('e2e', () => {
       expect(response.body.length).toEqual(2);
       multiplePath = response.body.map((e) => e.path);
     });
+  });
 
+  describe('e2e inventory', () => {
     it('/inventory/create (POST)', async () => {
       const payloadInventory = {
         name: 'Al-Maun',
