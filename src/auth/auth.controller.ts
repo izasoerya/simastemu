@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Header, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
+  ForgotPasswordDto,
   ReponseJWT,
   ResponseSignUp,
   UserSignInDto,
@@ -17,13 +18,21 @@ export class AuthController {
   @ApiBody({ type: UserSignInDto })
   @ApiResponse({ status: 201, type: ReponseJWT })
   signIn(@Body() UserSignInDto: UserSignInDto): Promise<ReponseJWT> {
-    return this.authService.userSignIn(UserSignInDto);
+    return this.authService.signIn(UserSignInDto);
   }
 
   @Post('sign-up')
   @ApiBody({ type: UserSignUpDto })
   @ApiResponse({ status: 201, type: ResponseSignUp })
   signUp(@Body() UserSignUpDto: UserSignUpDto): Promise<ResponseSignUp> {
-    return this.authService.userSignUp(UserSignUpDto);
+    return this.authService.signUp(UserSignUpDto);
+  }
+
+  @Post('forgot-password')
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ status: 201, type: Boolean })
+  @Header('Content-Type', 'application/json')
+  forgotPassword(@Body() body: ForgotPasswordDto): Promise<boolean> {
+    return this.authService.forgotPassword(body.email);
   }
 }

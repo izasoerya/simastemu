@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ResponseSignUp, UserSignInDto, UserSignUpDto } from './dtos/auth.dto';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dtos/user.dto';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -11,18 +12,28 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async userSignIn(user: UserSignInDto): Promise<{ accessToken: string }> {
-    const loggedUser = await this.userService.findOne(
-      user.email,
+  async signIn(user: UserSignInDto): Promise<{ accessToken: string }> {
+    const loggedUser = await this.userService.findOne({
+      email: user.email,
+    });
+    if (loggedUser === null) {
+      throw new UnauthorizedException('Email does not exist');
+    }
+
+    const compareHash = await bcrypt.compare(
       user.password,
+      loggedUser.password_hashed,
     );
-    const payload = { sub: loggedUser.uid, name: loggedUser.name };
-    return {
-      accessToken: await this.jwtService.signAsync(payload),
-    };
+    if (compareHash) {
+      const payload = { sub: loggedUser.uid, name: loggedUser.name };
+      return {
+        accessToken: await this.jwtService.signAsync(payload),
+      };
+    }
+    throw new UnauthorizedException('Password does not match');
   }
 
-  async userSignUp(user: UserSignUpDto): Promise<ResponseSignUp> {
+  async signUp(user: UserSignUpDto): Promise<ResponseSignUp> {
     const createUserDto: CreateUserDto = {
       ...user,
     };
@@ -33,5 +44,16 @@ export class AuthService {
       email: newUser.email,
     };
     return res;
+  }
+
+  async forgotPassword(email: string): Promise<boolean> {
+    const user = await this.userService.findOne({
+      email: email,
+    });
+    if (user === null) {
+      throw new UnauthorizedException('Email does not exist');
+    }
+    // TODO: CREATE SMTP TO SEND OTP
+    return true;
   }
 }
