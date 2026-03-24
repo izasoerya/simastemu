@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dtos/user.dto';
+import { CreateUserDto, UserQueryDto } from './dtos/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -30,23 +30,10 @@ export class UserService {
     return this.repo.save(newUser);
   }
 
-  async findOne(email: string, password: string) {
-    const isUserExist = await this.repo.findOneBy({
-      email: email,
-    });
-
-    if (isUserExist === null) {
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-    }
-
-    const compareHash = await bcrypt.compare(
-      password,
-      isUserExist.password_hashed,
-    );
-
-    if (compareHash) {
-      return isUserExist;
-    }
-    throw new HttpException('Wrong password', HttpStatus.FORBIDDEN);
+  async findOne(query: UserQueryDto): Promise<Users | null> {
+    const where: any = {};
+    if (query.uid) where.uid = query.uid;
+    if (query.email) where.email = query.email;
+    return this.repo.findOne({ where });
   }
 }
