@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ResponseSignUp, UserSignInDto, UserSignUpDto } from './dtos/auth.dto';
@@ -16,6 +17,7 @@ import { join } from 'node:path';
 @Injectable()
 export class AuthService {
   private static readonly OTP_TTL_MINUTES = 3;
+  private readonly logger = new Logger(AuthService.name);
 
   constructor(
     private userService: UserService,
@@ -72,6 +74,7 @@ export class AuthService {
       name: newUser.name,
       email: newUser.email,
     };
+    this.logger.log(`User created with email: ${res.email}`);
     return res;
   }
 
@@ -83,23 +86,28 @@ export class AuthService {
       throw new UnauthorizedException('Email does not exist');
     }
 
-    const resend = new Resend(process.env.SMTP_API_KEY);
-    const otp = await this.otpService.create({
-      email: email,
-    });
-    const html = await this.getOtpEmailHtml(otp.otp, email, new Date());
+    if (process.env.SMTP_API_KEY?.startsWith('re_')) {
+      const resend = new Resend(process.env.SMTP_API_KEY);
+      const otp = await this.otpService.create({
+        email: email,
+      });
+      const html = await this.getOtpEmailHtml(otp.otp, email, new Date());
 
-    const { error } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
-      to: [email],
-      subject: 'Your SIMASTEMU OTP Code',
-      html,
-    });
+      const { error } = await resend.emails.send({
+        from: 'Acme <onboarding@resend.dev>',
+        to: [email],
+        subject: 'Your SIMASTEMU OTP Code',
+        html,
+      });
 
-    if (error) {
-      throw new InternalServerErrorException(
-        'Something went wrong, try again later',
-      );
+      if (error) {
+        this.logger.fatal(`Failed to send email: ${email}`);
+        throw new InternalServerErrorException(
+          'Something went wrong, try again later',
+        );
+      }
+    } else {
+      this.logger.debug('In testing mode, skipping send email');
     }
 
     return true;

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
@@ -17,7 +17,9 @@ describe('e2e', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .setLogger(new Logger())
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
@@ -55,7 +57,7 @@ describe('e2e', () => {
   describe('e2e auth', () => {
     const payload = {
       name: 'test',
-      email: 'test@gmail.com',
+      email: 'test223421@gmail.com',
       password: 'hashed',
     };
 
@@ -65,8 +67,8 @@ describe('e2e', () => {
         .send(payload)
         .expect(201);
 
-      expect(response.body.name).toEqual('test');
-      expect(response.body.email).toEqual('test@gmail.com');
+      expect(response.body.name).toEqual(payload.name);
+      expect(response.body.email).toEqual(payload.email);
     });
 
     it('[FAILED] /auth/sign-up (POST) -> Not an email', async () => {
