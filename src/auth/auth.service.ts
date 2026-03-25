@@ -1,16 +1,45 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ResponseSignUp, UserSignInDto, UserSignUpDto } from './dtos/auth.dto';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dtos/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Resend } from 'resend';
+import { OtpService } from 'src/otp/otp.service';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 @Injectable()
 export class AuthService {
+  private static readonly OTP_TTL_MINUTES = 3;
+
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private otpService: OtpService,
   ) {}
+
+  private async getOtpEmailHtml(
+    otpCode: string,
+    email: string,
+    requestedAt: Date,
+  ): Promise<string> {
+    const templatePath = join(__dirname, 'page', 'otp.html');
+    const template = await readFile(templatePath, 'utf-8');
+
+    return template
+      .replace(/{{OTP_CODE}}/g, otpCode)
+      .replace(
+        /{{OTP_EXPIRE_MINUTES}}/g,
+        AuthService.OTP_TTL_MINUTES.toString(),
+      )
+      .replace(/{{REQUESTED_EMAIL}}/g, email)
+      .replace(/{{REQUESTED_AT}}/g, requestedAt.toISOString());
+  }
 
   async signIn(user: UserSignInDto): Promise<{ accessToken: string }> {
     const loggedUser = await this.userService.findOne({
@@ -53,7 +82,26 @@ export class AuthService {
     if (user === null) {
       throw new UnauthorizedException('Email does not exist');
     }
-    // TODO: CREATE SMTP TO SEND OTP
+
+    const resend = new Resend(process.env.SMTP_API_KEY);
+    const otp = await this.otpService.create({
+      email: email,
+    });
+    const html = await this.getOtpEmailHtml(otp.otp, email, new Date());
+
+    const { error } = await resend.emails.send({
+      from: 'Acme <onboarding@resend.dev>',
+      to: [email],
+      subject: 'Your SIMASTEMU OTP Code',
+      html,
+    });
+
+    if (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, try again later',
+      );
+    }
+
     return true;
   }
 }
