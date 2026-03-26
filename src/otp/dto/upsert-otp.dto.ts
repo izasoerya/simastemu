@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail } from 'class-validator';
 
-export class CreateOtpDto {
+export class UpsertOtpDto {
   @ApiProperty()
   @IsEmail()
   email: string;
