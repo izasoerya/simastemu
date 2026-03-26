@@ -70,7 +70,7 @@ export class AuthService {
 
     if (process.env.SMTP_API_KEY?.startsWith('re_')) {
       const resend = new Resend(process.env.SMTP_API_KEY);
-      const otp = await this.otpService.create({
+      const otp = await this.otpService.upsert({
         email: email,
       });
 
