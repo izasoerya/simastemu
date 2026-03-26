@@ -50,7 +50,11 @@ export class OtpService {
     }
 
     const match = await bcrypt.compare(otp, otpData.hashedOtp);
-    return match;
+    if (match) {
+      await this.remove({ email: email });
+      return match;
+    }
+    return false;
   }
 
   async upsert(upsertOtpDto: UpsertOtpDto): Promise<ResponseOtpDto> {
