@@ -25,24 +25,6 @@ export class AuthService {
     private otpService: OtpService,
   ) {}
 
-  private async getOtpEmailHtml(
-    otpCode: string,
-    email: string,
-    requestedAt: Date,
-  ): Promise<string> {
-    const templatePath = join(__dirname, 'page', 'otp.html');
-    const template = await readFile(templatePath, 'utf-8');
-
-    return template
-      .replace(/{{OTP_CODE}}/g, otpCode)
-      .replace(
-        /{{OTP_EXPIRE_MINUTES}}/g,
-        AuthService.OTP_TTL_MINUTES.toString(),
-      )
-      .replace(/{{REQUESTED_EMAIL}}/g, email)
-      .replace(/{{REQUESTED_AT}}/g, requestedAt.toISOString());
-  }
-
   async signIn(user: UserSignInDto): Promise<{ accessToken: string }> {
     const loggedUser = await this.userService.findOne({
       email: user.email,
@@ -91,13 +73,21 @@ export class AuthService {
       const otp = await this.otpService.create({
         email: email,
       });
-      const html = await this.getOtpEmailHtml(otp.otp, email, new Date());
 
       const { error } = await resend.emails.send({
-        from: 'Acme <onboarding@resend.dev>',
+        from: 'SimasetMU <developer@simasetmu.web.id>',
         to: [email],
-        subject: 'Your SIMASTEMU OTP Code',
-        html,
+        template: {
+          id: 'account-verification-otp',
+          variables: {
+            OTP_CODE: otp.otp,
+            OTP_EXPIRES_MINUTE: '3 Minutes',
+            PURPOSE: 'Forgot Password Verification',
+            REQUESTED_EMAIL: email,
+            SUBJECT: 'Recovery Forgot Password',
+            TITLE_EMAIL: 'Your OTP Code',
+          },
+        },
       });
 
       if (error) {
