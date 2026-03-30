@@ -35,7 +35,7 @@ export class AuthService {
 
     const compareHash = await bcrypt.compare(
       user.password,
-      loggedUser.password_hashed,
+      loggedUser.hashedPassword,
     );
     if (compareHash) {
       const payload = { sub: loggedUser.uid, name: loggedUser.name };

@@ -20,10 +20,7 @@ export class Users {
   email: string;
 
   @Column('text')
-  password_hashed: string;
-
-  @Column('text')
-  password_salt: string;
+  hashedPassword: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

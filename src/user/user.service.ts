@@ -23,8 +23,7 @@ export class UserService {
 
     const newUser = this.repo.create({
       ...user,
-      password_hashed: hashedPassword,
-      password_salt: salt,
+      hashedPassword: hashedPassword,
     });
 
     return this.repo.save(newUser);
