@@ -39,6 +39,13 @@ export class ReponseJWT {
   accessToken: string;
 }
 
+export class ForgotPasswordDto {
+  @ApiProperty()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+}
+
 export class ResponseSignUp {
   @ApiProperty()
   @IsString()

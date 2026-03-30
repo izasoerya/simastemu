@@ -12,3 +12,9 @@ export class CreateUserDto {
   @ApiProperty()
   password: string;
 }
+
+export class UserQueryDto {
+  uid?: string;
+
+  email?: string;
+}

@@ -20,10 +20,10 @@ export class Users {
   email: string;
 
   @Column('text')
-  password_hashed: string;
+  hashedPassword: string;
 
-  @Column('text')
-  password_salt: string;
+  @Column('boolean', { default: false })
+  isActivated: boolean;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
