@@ -22,6 +22,9 @@ export class Users {
   @Column('text')
   hashedPassword: string;
 
+  @Column('boolean', { default: false })
+  isActivated: boolean;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
